@@ -1,1 +1,1 @@
-# spring_data_elastic_search
+# Spring Data Elasticsearch
