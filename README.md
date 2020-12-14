@@ -21,3 +21,5 @@
 Goals:
  1. Show core spring repositories
  2. Show advance aggregates and qurries
+
+https://www.baeldung.com/spring-data-elasticsearch-tutorial
