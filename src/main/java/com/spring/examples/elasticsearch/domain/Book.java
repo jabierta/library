@@ -11,7 +11,6 @@ public class Book {
   @Id private String id;
   private String title;
   private String author;
-  private String ISBN;
   private Date year;
   private Boolean isAvailableToBorrow;
   private Date nextAvailability;

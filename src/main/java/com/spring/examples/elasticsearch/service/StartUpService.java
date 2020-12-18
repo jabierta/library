@@ -70,11 +70,14 @@ public class StartUpService {
                 "province",
                 "AWE"));
 
+    // if book index then create one, else delete all data and insert new data
+
+
+
+
+
     // if activity index then create one, else delete all data and insert new data
 
-    // if library index then create one, else delete all data and insert new data
-
-    // if book index then create one, else delete all data and insert new data
     elasticsearchClient.bulk(bulkRequest, RequestOptions.DEFAULT);
   }
 
