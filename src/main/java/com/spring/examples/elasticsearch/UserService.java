@@ -41,8 +41,16 @@ public class UserService {
   }
 
   public List<User> getUserByFirstName(String firstName) {
+    return getByPropertyValue("firstName", firstName);
+  }
+
+  public List<User> getUserByLastName(String lastName) {
+    return getByPropertyValue("lastName", lastName);
+  }
+
+  private List<User> getByPropertyValue(String field, String fieldValue) {
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.matchQuery("firstName.keyword", "firstName"));
+    searchSourceBuilder.query(QueryBuilders.matchQuery(field + ".keyword", fieldValue));
 
     SearchRequest searchRequest = new SearchRequest();
     searchRequest.source(searchSourceBuilder);
@@ -66,7 +74,7 @@ public class UserService {
     }
   }
 
-  public User getUserByLastName() {
+  private User update(String firstName, String lastName) {
     return null;
   }
 }
