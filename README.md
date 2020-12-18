@@ -24,9 +24,12 @@ Goals:
 
 Controllers all will have basic CRUD operations:
     User
+
     Book
+
     Library
         Basically just a location that contains books
+
     Activity
         An activity done by a user action enum
         - CheckedIn
@@ -34,8 +37,8 @@ Controllers all will have basic CRUD operations:
         - Inquired
         - Reserved
         - Date  
-    
-       
+
+https://stackoverflow.com/questions/24778454/how-to-insert-multiple-records-in-one-query/24778541
 
 
     
