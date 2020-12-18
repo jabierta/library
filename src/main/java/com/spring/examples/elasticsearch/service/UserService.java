@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -100,5 +101,12 @@ public class UserService {
     }
   }
 
-  private void delete(String id) {}
+  private void delete(String id) {
+    try {
+      elasticsearchClient.delete(new DeleteRequest("user", id), RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new ServerErrorException("Server encountered an error deleting user.", e);
+    }
+  }
 }
