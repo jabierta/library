@@ -13,8 +13,8 @@ public class ElasticsearchClientConfiguration extends AbstractElasticsearchConfi
   @Value("${elasticsearh.hostandport}")
   private String hostAndPort;
 
-  @Override
   @Bean
+  @Override
   public RestHighLevelClient elasticsearchClient() {
     final ClientConfiguration clientConfiguration =
         ClientConfiguration.builder().connectedTo(hostAndPort).build();

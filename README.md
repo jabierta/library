@@ -19,7 +19,24 @@
 
  Current Page: https://docs.spring.io/spring-data/elasticsearch/docs/4.1.2/reference/html/#elasticsearch.clients
 Goals:
- 1. Show core spring repositories
- 2. Show advance aggregates and qurries
+ 1. Show advance aggregates and qurries
 
+
+Controllers all will have basic CRUD operations:
+    User
+    Book
+    Library
+        Basically just a location that contains books
+    Activity
+        An activity done by a user action enum
+        - CheckedIn
+        - CheckedOut
+        - Inquired
+        - Reserved
+        - Date  
+    
+       
+
+
+    
 https://www.baeldung.com/spring-data-elasticsearch-tutorial
