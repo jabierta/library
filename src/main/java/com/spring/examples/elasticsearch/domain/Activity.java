@@ -11,5 +11,7 @@ public class Activity {
   @Id private String id;
   private String activityType;
   private Date activityDate;
+  private String userId;
+  private String bookId;
   private String libraryId;
 }
