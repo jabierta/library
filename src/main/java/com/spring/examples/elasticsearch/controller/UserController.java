@@ -1,6 +1,6 @@
 package com.spring.examples.elasticsearch.controller;
 
-import com.spring.examples.elasticsearch.UserService;
+import com.spring.examples.elasticsearch.service.UserService;
 import com.spring.examples.elasticsearch.controller.request.CreateUserRequest;
 import com.spring.examples.elasticsearch.domain.User;
 import lombok.RequiredArgsConstructor;

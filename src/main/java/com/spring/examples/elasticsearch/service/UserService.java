@@ -1,15 +1,19 @@
-package com.spring.examples.elasticsearch;
+package com.spring.examples.elasticsearch.service;
 
 import com.spring.examples.elasticsearch.domain.User;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.get.GetResult;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -74,11 +78,27 @@ public class UserService {
     }
   }
 
-  private User update(String firstName, String lastName) {
-    return null;
+  private User update(String id, String firstName, String lastName) {
+    Map<String, Object> jsonMap = new HashMap<>();
+    jsonMap.put("firstName", firstName);
+    jsonMap.put("lastName", lastName);
+
+    try {
+      GetResult result =
+          elasticsearchClient
+              .update(new UpdateRequest("user", id).doc(jsonMap), RequestOptions.DEFAULT)
+              .getGetResult();
+      Map<String, Object> sourceAsMap = result.sourceAsMap();
+      return new User(
+          result.getId(),
+          (String) sourceAsMap.get("firstName"),
+          (String) sourceAsMap.get("lastName"));
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new ServerErrorException("Server encountered an error updating user.", e);
+    }
   }
 
   private void delete(String id) {}
-
-
 }
