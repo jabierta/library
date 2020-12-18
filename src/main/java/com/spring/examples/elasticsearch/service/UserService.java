@@ -27,7 +27,6 @@ public class UserService {
   private final ElasticsearchOperations elasticsearchOperations;
   private final RestHighLevelClient elasticsearchClient;
 
-  // CRUD operations
   public User create(String firstName, String lastName) {
     User user = new User();
     user.setFirstName(firstName);
