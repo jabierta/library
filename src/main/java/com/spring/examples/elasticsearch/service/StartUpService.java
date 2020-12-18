@@ -1,6 +1,8 @@
 package com.spring.examples.elasticsearch.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -12,11 +14,15 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class StartUpService {
+  private final ResourceLoader resourceLoader;
+
   private final RestHighLevelClient elasticsearchClient;
 
   @PostConstruct
@@ -71,10 +77,17 @@ public class StartUpService {
                 "AWE"));
 
     // if book index then create one, else delete all data and insert new data
+    Resource resource = resourceLoader.getResource("classpath:timetop100novels.csv");
+    BufferedReader csvReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+    String line;
+    while ((line = csvReader.readLine()) != null) {
+      if (!line.equals("Title,Author,Year\n")) {
+        String[] data = line.split(",");
+        bulkRequest.add(createBookRequest());
+      }
+    }
 
-
-
-
+    csvReader.close();
 
     // if activity index then create one, else delete all data and insert new data
 
@@ -83,6 +96,11 @@ public class StartUpService {
 
   private IndexRequest createUserRequest(String firstName, String lastName) {
     return new IndexRequest("user")
+        .source(XContentType.JSON, "firstName", firstName, "lastName", lastName);
+  }
+
+  private IndexRequest createBookRequest(String firstName, String lastName) {
+    return new IndexRequest("book")
         .source(XContentType.JSON, "firstName", firstName, "lastName", lastName);
   }
 }
