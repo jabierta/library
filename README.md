@@ -39,7 +39,5 @@ Controllers all will have basic CRUD operations:
         - Date  
 
 https://stackoverflow.com/questions/24778454/how-to-insert-multiple-records-in-one-query/24778541
-    
-https://www.baeldung.com/spring-data-elasticsearch-tutorial
 
 https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-overview.html
