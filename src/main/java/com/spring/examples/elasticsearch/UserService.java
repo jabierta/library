@@ -77,4 +77,8 @@ public class UserService {
   private User update(String firstName, String lastName) {
     return null;
   }
+
+  private void delete(String id) {}
+
+
 }
