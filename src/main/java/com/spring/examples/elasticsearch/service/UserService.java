@@ -1,7 +1,10 @@
 package com.spring.examples.elasticsearch.service;
 
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+
 import com.spring.examples.elasticsearch.domain.User;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +12,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.search.ClearScrollRequest;
+import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.get.GetResult;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -42,6 +49,50 @@ public class UserService {
 
   public User findUserById(String id) {
     return elasticsearchOperations.get(id, User.class);
+  }
+
+  public List<User> list() {
+    List<User> users = new ArrayList<>();
+
+    SearchRequest searchRequest = new SearchRequest("user");
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    searchSourceBuilder.query(matchAllQuery());
+    searchSourceBuilder.size(10000);
+    searchRequest.source(searchSourceBuilder);
+    searchRequest.scroll(TimeValue.timeValueMinutes(1L));
+    SearchResponse searchResponse = null;
+    String scrollId = null;
+    try {
+      searchResponse = elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
+      scrollId = searchResponse.getScrollId();
+
+      while (searchResponse.getHits() != null && searchResponse.getHits().getHits().length > 0) {
+        SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+        scrollRequest.scroll(TimeValue.timeValueMinutes(1L));
+        
+        searchResponse = elasticsearchClient.scroll(scrollRequest, RequestOptions.DEFAULT);
+
+        users.addAll(Arrays.stream(searchResponse.getHits().getHits())
+            .map(
+                hit ->
+                    new User(
+                        hit.getId(),
+                        (String) hit.getSourceAsMap().get("firstName"),
+                        (String) hit.getSourceAsMap().get("lastName")))
+            .collect(Collectors.toList()));
+        
+        scrollId = searchResponse.getScrollId();
+      }
+      ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+      clearScrollRequest.addScrollId(scrollId);
+      ClearScrollResponse clearScrollResponse =
+          elasticsearchClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new ServerErrorException("Server encountered an error listing users.", e);
+    }
+
+    return users;
   }
 
   public List<User> getUserByFirstName(String firstName) {
