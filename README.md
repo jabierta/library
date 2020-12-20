@@ -45,6 +45,12 @@ Explain Setup
 Explain Usage
     - Start up
     - Endpoints
+        
+        - Get activities of user
+        - Get favourite book of user
+        
+        - Get the most popular book borrowed
+        
 
 
 https://stackoverflow.com/questions/24778454/how-to-insert-multiple-records-in-one-query/24778541
