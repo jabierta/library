@@ -41,6 +41,7 @@ public class StartUpService {
   private void initializeData() throws IOException, ParseException {
     BulkRequest userBulkRequest = new BulkRequest();
 
+    // Delete existing user index and creates an empty user index
     if (!elasticsearchClient
         .indices()
         .exists(new GetIndexRequest("user"), RequestOptions.DEFAULT)) {
@@ -65,6 +66,7 @@ public class StartUpService {
 
     elasticsearchClient.bulk(userBulkRequest, RequestOptions.DEFAULT);
 
+    // Delete existing library index and creates an empty library index
     if (!elasticsearchClient
         .indices()
         .exists(new GetIndexRequest("library"), RequestOptions.DEFAULT)) {
@@ -76,7 +78,8 @@ public class StartUpService {
           new DeleteByQueryRequest("library").setQuery(QueryBuilders.matchAllQuery()),
           RequestOptions.DEFAULT);
     }
-    // save the library right away.
+
+    // Save the library right away
     userBulkRequest.add(
         new IndexRequest("library")
             .source(
@@ -90,6 +93,7 @@ public class StartUpService {
                 "province",
                 "AWE"));
 
+    // Find the Abiertas Library and use the _id to save books into it.
     SearchSourceBuilder getLibrarySearchSourceBuilder = new SearchSourceBuilder();
     getLibrarySearchSourceBuilder
         .query(QueryBuilders.matchQuery("name.keyword", "Abiertas Library"))
@@ -102,7 +106,6 @@ public class StartUpService {
     SearchHit searchHit = getLibrarySearchResponse.getHits().getHits()[0];
     Map<String, Object> sourceAsMap = searchHit.getSourceAsMap();
 
-    // TODO create multiple coppies of book
     Library library = new Library();
     library.setId(searchHit.getId());
     library.setName((String) sourceAsMap.get("name"));
@@ -110,6 +113,7 @@ public class StartUpService {
     library.setCity((String) sourceAsMap.get("city"));
     library.setProvince((String) sourceAsMap.get("province"));
 
+    // Delete existing book index and creates an empty book index
     if (!elasticsearchClient
         .indices()
         .exists(new GetIndexRequest("book"), RequestOptions.DEFAULT)) {
@@ -122,13 +126,16 @@ public class StartUpService {
 
     BulkRequest bookBulkRequest = new BulkRequest();
 
-    Resource resource = resourceLoader.getResource("classpath:timetop100novels.csv");
+    // Getting the file from resource path
+    Resource resource = resourceLoader.getResource("classpath:books.csv");
     BufferedReader csvReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
     Integer lineNum = 0;
     String line;
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
     Map<Integer, Pair<List<String>, Boolean>> books = new HashMap<>();
+
+    // Iterate through file and create books
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
@@ -140,8 +147,9 @@ public class StartUpService {
       lineNum++;
     }
 
-    // randomly assigned users and books and actions
     csvReader.close();
+
+    // randomly assigned users and books and actions
 
     // how am ig going to do it
     // GET All userIds -> Create a list
@@ -149,10 +157,11 @@ public class StartUpService {
 
     // Create
 
-   // create 5000 activities lol this users are book addicts! -> they would only keep it for a maximum 30 days! I need to figure out reservations!
+    // create 5000 activities lol this users are book addicts! -> they would only keep it for a
+    // maximum 30 days! I need to figure out reservations!
     // int i = 0;
     // while i <=5000
-      // get a random book and
+    // get a random book and
 
     // if activity index then create one, else delete all data and insert new data
 
