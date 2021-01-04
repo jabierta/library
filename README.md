@@ -23,10 +23,15 @@ Goals:
 
 
 Controllers all will have basic CRUD operations:
+    
     User
-
+        - Favourite book of user
+        - On average how long does a user keep a book
+    
     Book
-
+        - Most requested book
+        - 
+    
     Library
         Basically just a location that contains books
 
@@ -45,12 +50,7 @@ Explain Setup
 Explain Usage
     - Start up
     - Endpoints
-        
-        - Get activities of user
-        - Get favourite book of user
-        
-        - Get the most popular book borrowed
-        
+        - Refer to above
 
 
 https://stackoverflow.com/questions/24778454/how-to-insert-multiple-records-in-one-query/24778541

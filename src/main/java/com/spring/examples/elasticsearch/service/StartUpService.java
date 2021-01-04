@@ -102,6 +102,7 @@ public class StartUpService {
     SearchHit searchHit = getLibrarySearchResponse.getHits().getHits()[0];
     Map<String, Object> sourceAsMap = searchHit.getSourceAsMap();
 
+    // TODO create multiple coppies of book
     Library library = new Library();
     library.setId(searchHit.getId());
     library.setName((String) sourceAsMap.get("name"));
@@ -148,7 +149,7 @@ public class StartUpService {
 
     // Create
 
-   // create 5000 activities lol this users are book addicts! -> they would only keep it for a maximum 3 days! I need to figure out reservations!
+   // create 5000 activities lol this users are book addicts! -> they would only keep it for a maximum 30 days! I need to figure out reservations!
     // int i = 0;
     // while i <=5000
       // get a random book and
