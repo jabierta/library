@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import javax.annotation.PostConstruct;
 import jdk.internal.net.http.common.Pair;
 import lombok.RequiredArgsConstructor;
@@ -178,42 +178,36 @@ public class StartUpService {
     // Getting the file from resource path
     Resource resource = resourceLoader.getResource("classpath:books.csv");
     BufferedReader csvReader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
-    Integer lineNum = 0;
     String line;
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
     Map<Integer, Pair<List<String>, Boolean>> books = new HashMap<>();
+    int maxBooks = 5;
+    int minBooks = 1;
+
+    // Get current date
 
     // Iterate through file and create books
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
-        books.put(lineNum, new Pair<>(Arrays.asList(data.clone()), true));
+        // create books with weighted randomness for amount
+        int numBooks = (int) Math.floor(Math.abs( new Random().nextInt(1) - new Random().nextInt(1)) * (1 + maxBooks - minBooks) + minBooks);
         bookBulkRequest.add(
             createBookRequest(
-                data[0], data[1], simpleDateFormat.parse(""), true, null, library.getId()));
+                data[0], data[1], simpleDateFormat.parse(data[2]), true, null, library.getId()));
       }
-      lineNum++;
     }
-
     csvReader.close();
 
+    // Itterate through year 2021
+      for (day in year) {
+        itterate through each user if there are any books that are required to be returned if so add them to the array
+        itterate through each user and see if any of there reserved book is available to borrow add them to the array
+          if they have full inventory then they can either return 1 of there current used books or keep resrving
+        if size of array is less than 30 then add more users to borrow books
+      }
 
-    // randomly assigned users and books and actions
-
-    // how am ig going to do it
-    // GET All userIds -> Create a list
-    //  Create a Map of book <Int, Pair<List<String>, Boolean>>
-
-    // Create
-
-    // Maximum of 5 books -> they would only keep it for a
-    // maximum 30 days! I need to figure out reservations!
-    // int i = 0;
-    // while i <=5000
-    // get a random book and
-
-    // if activity index then create one, else delete all data and insert new data
 
   }
 

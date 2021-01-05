@@ -39,7 +39,6 @@ Controllers all will have basic CRUD operations:
         An activity done by a user action enum
         - CheckedIn
         - CheckedOut
-        - Inquired
         - Reserved
         - Date
         - Top Active User(s)

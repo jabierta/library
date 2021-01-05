@@ -1,101 +1,165 @@
-Title,Author,Year
-The Adventures of Augie March,Saul Bellow,1953
-All the King’s Men,Robert Penn Warren,1946
-American Pastoral,Philip Roth,1997
-An American Tragedy,Theodore Dreiser,1925
-Animal Farm,George Orwell,1946
-Appointment in Samarra,John O'Hara,1934
-"Are You There God? It's Me, Margaret.",Judy Blume,1970
-The Assistant,Bernard Malamud,1957
-At Swim-Two-Birds,Flann O'Brien,1938
-Atonement,Ian McEwan,2002
-Beloved,Toni Morrison,1987
-The Berlin Stories,Christopher Isherwood,1946
-The Big Sleep,Raymond Chandler,1939
-The Blind Assassin,Margaret Atwood,2000
-Blood Meridian,Cormac McCarthy,1986
-Brideshead Revisited,Evelyn Waugh,1946
-The Bridge of San Luis Rey,Thornton Wilder,1927
-Call It Sleep,Henry Roth,1935
-Catch-22,Joseph Heller,1961
-The Catcher in the Rye,J.D. Salinger,1951
-A Clockwork Orange,Anthony Burgess,1963
-The Confessions of Nat Turner,William Styron,1967
-The Corrections,Jonathan Franzen,2001
-The Crying of Lot 49,Thomas Pynchon,1966
-A Dance to the Music of Time,Anthony Powell,1951
-The Day of the Locust,Nathanael West,1939
-Death Comes for the Archbishop,Willa Cather,1927
-A Death in the Family,James Agee,1958
-The Death of the Heart,Elizabeth Bowen,1958
-Deliverance,James Dickey,1970
-Dog Soldiers,Robert Stone,1974
-Falconer,John Cheever,1977
-The French Lieutenant's Woman,John Fowles,1969
-The Golden Notebook,Doris Lessing,1962
-Go Tell It on the Mountain,James Baldwin,1953
-Gone with the Wind,Margaret Mitchell,1936
-The Grapes of Wrath,John Steinbeck,1939
-Gravity's Rainbow,Thomas Pynchon,1973
-The Great Gatsby,F. Scott Fitzgerald,1925
-A Handful of Dust,Evelyn Waugh,1934
-The Heart Is a Lonely Hunter,Carson McCullers,1940
-The Heart of the Matter,Graham Greene,1948
-Herzog,Saul Bellow,1964
-Housekeeping,Marilynne Robinson,1981
-A House for Mr. Biswas,V.S. Naipaul,1962
-"I, Claudius",Robert Graves,1934
-Infinite Jest,David Foster Wallace,1996
-Invisible Man,Ralph Ellison,1952
-Light in August,William Faulkner,1932
-"The Lion, The Witch and the Wardrobe",C.S. Lewis,1950
+﻿Harry Potter and the Philosopher's Stone,J. K Rowling,1997
+The Little Prince,Antoine de Saint-Exupéry,1943
+Dream of the Red Chamber,Cao Xueqin,1800
+The Hobbit,J. R. R. Tolkien,1937
+"The Lion, the Witch and the Wardrobe",C. S. Lewis,1950
+She: A History of Adventure,H. Rider Haggard,1887
+The Adventures of Pinocchio (Le avventure di Pinocchio),Carlo Collodi,1881
+The Da Vinci Code,Dan Brown,2003
+Harry Potter and the Chamber of Secrets,J. K. Rowling,1998
+Harry Potter and the Prisoner of Azkaban,J. K. Rowling,1999
+Harry Potter and the Goblet of Fire,J. K. Rowling,2000
+Harry Potter and the Order of the Phoenix,J. K. Rowling,2003
+Harry Potter and the Half-Blood Prince,J. K. Rowling,2005
+Harry Potter and the Deathly Hallows,J. K. Rowling,2007
+The Alchemist (O Alquimista),Paulo Coelho,1988
+The Catcher in the Rye,J. D. Salinger,1951
+The Bridges of Madison County,Robert James Waller,1992
+Ben-Hur: A Tale of the Christ,Lew Wallace,1880
+You Can Heal Your Life,Louise Hay,1984
+One Hundred Years of Solitude (Cien años de soledad),Gabriel García Márquez,1967
 Lolita,Vladimir Nabokov,1955
-Lord of the Flies,William Golding,1954
-The Lord of the Rings,J.R.R. Tolkien,1954
-Loving,Henry Green,1945
-Lucky Jim,Kingsley Amis,1954
-The Man Who Loved Children,Christina Stead,1940
-Midnight's Children,Salman Rushdie,1981
-Money,Martin Amis,1984
-The Moviegoer,Walker Percy,1961
-Mrs. Dalloway,Virginia Woolf,1925
-Naked Lunch,William Burroughs,1959
-Native Son,Richard Wright,1940
-Neuromancer,William Gibson,1984
-Never Let Me Go,Kazuo Ishiguro,2005
-1984,George Orwell,1948
-On the Road,Jack Kerouac,1957
-One Flew Over the Cuckoo's Nest,Ken Kesey,1962
-The Painted Bird,Jerzy Kosinski,1965
-Pale Fire,Vladimir Nabokov,1962
-A Passage to India,E.M. Forster,1924
-Play It as It Lays,Joan Didion,1970
-Portnoy's Complaint,Philip Roth,1969
-Possession,A.S. Byatt,1990
-The Power and the Glory,Graham Greene,1939
-The Prime of Miss Jean Brodie,Muriel Spark,1961
-"Rabbit, Run",John Updike,1960
-Ragtime,E.L. Doctorow,1975
-The Recognitions,William Gaddis,1955
-Red Harvest,Dashiell Hammett,1929
-Revolutionary Road,Richard Yates,1961
-The Sheltering Sky,Paul Bowles,1949
-Slaughterhouse-Five,Kurt Vonnegut,1969
-Snow Crash,Neal Stephenson,1992
-The Sot-Weed Factor,John Barth,1960
-The Sound and the Fury,William Faulkner,1929
-The Sportswriter,Richard Ford,1986
-The Spy Who Came in from the Cold,John le Carré,1964
-The Sun Also Rises,Ernest Hemingway,1926
-Their Eyes Were Watching God,Zora Neale Hurston,1937
-Things Fall Apart,Chinua Achebe,1959
+Heidi,Johanna Spyri,1880
+The Common Sense Book of Baby and Child Care,Dr. Benjamin Spock,1946
+Anne of Green Gables,Lucy Maud Montgomery,1908
+Black Beauty,Anna Sewell,1877
+The Name of the Rose (Il Nome della Rosa),Umberto Eco,1980
+The Eagle Has Landed,Jack Higgins,1975
+Watership Down,Richard Adams,1972
+The Hite Report,Shere Hite,1976
+Charlotte's Web,E. B. White; illustrated by Garth Williams,1952
+The Ginger Man,J. P. Donleavy,1955
+The Tale of Peter Rabbit,Beatrix Potter,1902
+Jonathan Livingston Seagull,Richard Bach,1970
+The Very Hungry Caterpillar,Eric Carle,1969
+A Message to Garcia,Elbert Hubbard,1899
 To Kill a Mockingbird,Harper Lee,1960
-To the Lighthouse,Virginia Woolf,1929
-Tropic of Cancer,Henry Miller,1934
-Ubik,Philip K. Dick,1969
-Under the Net,Iris Murdoch,1954
-Under the Volcano,Malcolm Lowry,1947
-Watchmen,Alan Moore and Dave Gibbons,1986
-White Noise,Don DeLillo,1985
-White Teeth,Zadie Smith,2000
-Wide Sargasso Sea,Jean Rhys,1966
+Flowers in the Attic,V. C. Andrews,1979
+Cosmos,Carl Sagan,1980
+Sophie's World (Sofies verden),Jostein Gaarder,1991
+Angels & Demons,Dan Brown,2000
+Kane and Abel,Jeffrey Archer,1979
+How the Steel Was Tempered (Как закалялась сталь),Nikolai Ostrovsky,1932
+War and Peace (Война и мир),Leo Tolstoy,1869
+The Diary of Anne Frank (Het Achterhuis),Anne Frank,1947
+Your Erroneous Zones,Wayne Dyer,1976
+The Thorn Birds,Colleen McCullough,1977
+The Purpose Driven Life,Rick Warren,2002
+The Kite Runner,Khaled Hosseini,2003
+Valley of the Dolls,Jacqueline Susann,1966
+The Great Gatsby,F. Scott Fitzgerald,1925
+Gone with the Wind,Margaret Mitchell,1936
+Rebecca,Daphne du Maurier,1938
+Nineteen Eighty-Four,George Orwell,1949
+The Revolt of Mamie Stover,William Bradford Huie,1951
+The Girl with the Dragon Tattoo (Män som hatar kvinnor),Stieg Larsson,2005
+The Lost Symbol,Dan Brown,2009
+The Hunger Games,Suzanne Collins,2008
+James and the Giant Peach,Roald Dahl,1961
+The Young Guard (Молодая гвардия),Alexander Alexandrovich Fadeyev,1945
+Who Moved My Cheese?,Spencer Johnson,1998
+A Brief History of Time,Stephen Hawking,1988
+Paul et Virginie,Jacques-Henri Bernardin de Saint-Pierre,1788
+Lust for Life,Irving Stone,1934
+The Wind in the Willows,Kenneth Grahame,1908
+The 7 Habits of Highly Effective People,Stephen R. Covey,1989
+Virgin Soil Upturned (Поднятая целина),Mikhail Sholokhov,1935
+The Celestine Prophecy,James Redfield,1993
+The Fault in Our Stars,John Green,2012
+The Shack,William P. Young,2007
+Uncle Styopa (Дядя Степа),Sergey Mikhalkov,1936
+The Godfather,Mario Puzo,1969
+Love Story,Erich Segal,1970
+Catching Fire,Suzanne Collins,2009
+Mockingjay,Suzanne Collins,2010
+Kitchen,Banana Yoshimoto,1988
+Andromeda Nebula,Ivan Yefremov,1957
+Autobiography of a Yogi,Paramahansa Yogananda,1946
+Gone Girl,Gillian Flynn,2012
+The Girl on the Train,Paula Hawkins,2015
+All Quiet on the Western Front (Im Westen nichts Neues),Erich Maria Remarque,1929
+The Bermuda Triangle,Charles Berlitz,1974
+Things Fall Apart,Chinua Achebe,1958
+Animal Farm,George Orwell,1945
+Wolf Totem (狼图腾),Jiang Rong,2004
+The Happy Hooker: My Own Story,Xaviera Hollander,1971
+Jaws,Peter Benchley,1974
+Love You Forever,Robert Munsch,1986
+The Women's Room,Marilyn French,1977
+What to Expect When You're Expecting,Arlene Eisenberg and Heidi Murkoff,1984
+Adventures of Huckleberry Finn,Mark Twain,1885
+"The Secret Diary of Adrian Mole, Aged 13¾",Sue Townsend,1982
+Pride and Prejudice,Jane Austen,1813
+Kon-Tiki: Across the Pacific in a Raft (Kon-Tiki ekspedisjonen),Thor Heyerdahl,1950
+The Good Soldier Švejk (Osudy dobrého vojáka Švejka za světové války),Jaroslav Hašek,1923
+Where the Wild Things Are,Maurice Sendak,1963
+The Power of Positive Thinking,Norman Vincent Peale,1952
+The Secret,Rhonda Byrne,2006
+Fear of Flying,Erica Jong,1973
+Dune,Frank Herbert,1965
+Charlie and the Chocolate Factory,Roald Dahl,1964
+The Naked Ape,Desmond Morris,1968
+"Totto-chan, the Little Girl at the Window (窓ぎわのトットちゃん)",Tetsuko Kuroyanagi,1981
+Matilda,Roald Dahl,1988
+The Book Thief,Markus Zusak,2005
+The Horse Whisperer,Nicholas Evans,1995
+Goodnight Moon,Margaret Wise Brown,1947
+The Neverending Story (Die unendliche Geschichte),Michael Ende,1979
+Fifty Shades of Grey,E. L. James,2011
+The Outsiders,S. E. Hinton,1967
+Guess How Much I Love You,Sam McBratney,1994
+Shōgun,James Clavell,1975
+The Poky Little Puppy,Janette Sebring Lowrey,1942
+The Pillars of the Earth,Ken Follett,1989
+How to Win Friends and Influence People,Dale Carnegie,1936
+Perfume (Das Parfum),Patrick Süskind,1985
+The Grapes of Wrath,John Steinbeck,1939
+The Shadow of the Wind (La sombra del viento),Carlos Ruiz Zafón,2001
+Interpreter of Maladies,Jhumpa Lahiri,2000
+Becoming,Michelle Obama,2018
+The Hitchhiker's Guide to the Galaxy,Douglas Adams,1979
+Tuesdays with Morrie,Mitch Albom,1997
+God's Little Acre,Erskine Caldwell,1933
+Follow Your Heart (Va' dove ti porta il cuore),Susanna Tamaro,1994
+A Wrinkle in Time,Madeleine L'Engle,1962
+Long Walk to Freedom,Nelson Mandela,1994
+The Old Man and the Sea,Ernest Hemingway,1952
+Life After Life,Raymond Moody,1975
+Me Before You,Jojo Moyes,2012
+Norwegian Wood (ノルウェイの森),Haruki Murakami,1987
+Peyton Place,Grace Metalious,1956
+The Plague (La Peste),Albert Camus,1947
+No Longer Human (人間失格),Osamu Dazai,1948
+Man's Search for Meaning (Ein Psychologe erlebt das Konzentrationslager),Viktor Frankl,1946
+The Divine Comedy (La Divina Commedia),Dante Alighieri,1304
+The Prophet,Kahlil Gibran,1923
+The Exorcist,William Peter Blatty,1971
+The Gruffalo,Julia Donaldson,1999
+Fifty Shades Darker,E. L. James,2012
+"Ronia, the Robber's Daughter",Astrid Lindgren,1981
+The Cat in the Hat,Dr. Seuss,1957
+Diana: Her True Story,Andrew Morton,1992
+The Help,Kathryn Stockett,2009
+Catch-22,Joseph Heller,1961
+The Stranger (L'Étranger),Albert Camus,1942
+Eye of the Needle,Ken Follett,1978
+The Lovely Bones,Alice Sebold,2002
+Wild Swans,Jung Chang,1992
+Santa Evita,Tomás Eloy Martínez,1995
+Night (Un di Velt Hot Geshvign),Elie Wiesel,1958
+Confucius from the Heart (于丹《论语》心得),Yu Dan,2006
+The Total Woman,Marabel Morgan,1974
+Knowledge-value Revolution (知価革命),Taichi Sakaiya,1985
+Problems in China's Socialist Economy (中国社会主义经济问题研究),Xue Muqiao,1979
+What Color Is Your Parachute?,Richard Nelson Bolles,1970
+The Dukan Diet,Pierre Dukan,2000
+The Joy of Sex,Alex Comfort,1972
+The Gospel According to Peanuts,Robert L. Short,1965
+Life of Pi,Yann Martel,2001
+The Giver,Lois Lowry,1993
+The Front Runner,Patricia Nell Warren,1974
+The Goal,Eliyahu M. Goldratt,1984
+Fahrenheit 451,Ray Bradbury,1953
+Angela's Ashes,Frank McCourt,1996
+The Story of My Experiments with Truth (સત્યના પ્રયોગો અથવા આત્મકથા),Mohandas Karamchand Gandhi,1925
+Bridget Jones's Diary,Helen Fielding, 1996

@@ -38,6 +38,7 @@ public class UserService {
     User user = new User();
     user.setFirstName(firstName);
     user.setLastName(lastName);
+    user.setIdsOfCurrentlyBorrowedBooks(new ArrayList<>());
     try {
       return elasticsearchOperations.save(user);
 
@@ -69,18 +70,21 @@ public class UserService {
       while (searchResponse.getHits() != null && searchResponse.getHits().getHits().length > 0) {
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(TimeValue.timeValueMinutes(1L));
-        
+
         searchResponse = elasticsearchClient.scroll(scrollRequest, RequestOptions.DEFAULT);
 
-        users.addAll(Arrays.stream(searchResponse.getHits().getHits())
-            .map(
-                hit ->
-                    new User(
-                        hit.getId(),
-                        (String) hit.getSourceAsMap().get("firstName"),
-                        (String) hit.getSourceAsMap().get("lastName")))
-            .collect(Collectors.toList()));
-        
+        users.addAll(
+            Arrays.stream(searchResponse.getHits().getHits())
+                .map(
+                    hit ->
+                        new User(
+                            hit.getId(),
+                            (String) hit.getSourceAsMap().get("firstName"),
+                            (String) hit.getSourceAsMap().get("lastName"),
+                            (List<String>)
+                                hit.getSourceAsMap().get("idsOfCurrentlyBorrowedBooks")))
+                .collect(Collectors.toList()));
+
         scrollId = searchResponse.getScrollId();
       }
       ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
@@ -120,7 +124,8 @@ public class UserService {
                   new User(
                       hit.getId(),
                       (String) hit.getSourceAsMap().get("firstName"),
-                      (String) hit.getSourceAsMap().get("lastName")))
+                      (String) hit.getSourceAsMap().get("lastName"),
+                      (List<String>) hit.getSourceAsMap().get("idsOfCurrentlyBorrowedBooks")))
           .collect(Collectors.toList());
 
     } catch (IOException e) {
@@ -143,7 +148,8 @@ public class UserService {
       return new User(
           result.getId(),
           (String) sourceAsMap.get("firstName"),
-          (String) sourceAsMap.get("lastName"));
+          (String) sourceAsMap.get("lastName"),
+          (List<String>) sourceAsMap.get("idsOfCurrentlyBorrowedBooks"));
 
     } catch (IOException e) {
       e.printStackTrace();
