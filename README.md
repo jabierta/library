@@ -27,7 +27,7 @@ Controllers all will have basic CRUD operations:
     User
         - Favourite book of user
         - On average how long does a user keep a book
-    
+
     Book
         - Most requested book
         - 
@@ -41,7 +41,10 @@ Controllers all will have basic CRUD operations:
         - CheckedOut
         - Inquired
         - Reserved
-        - Date  
+        - Date
+        - Top Active User(s)
+        - Least Active User(s)
+
 
 Explain Project
 

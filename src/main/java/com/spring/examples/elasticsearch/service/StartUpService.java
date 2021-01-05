@@ -63,6 +63,55 @@ public class StartUpService {
     userBulkRequest.add(createUserRequest("Jenny", "Smith"));
     userBulkRequest.add(createUserRequest("Jack", "Mason"));
     userBulkRequest.add(createUserRequest("Alex", "Mason"));
+    userBulkRequest.add(createUserRequest("Rafael", "Dore"));
+    userBulkRequest.add(createUserRequest("Cinda", "Mallari"));
+    userBulkRequest.add(createUserRequest("Dani", "Waits"));
+    userBulkRequest.add(createUserRequest("Salley", "Holdridge"));
+    userBulkRequest.add(createUserRequest("Gertrudis", "Rentschler"));
+    userBulkRequest.add(createUserRequest("Marylin", "Giddings"));
+    userBulkRequest.add(createUserRequest("Reita", "Beltrami"));
+    userBulkRequest.add(createUserRequest("Carley", "Howton"));
+    userBulkRequest.add(createUserRequest("Marco", "Serafini"));
+    userBulkRequest.add(createUserRequest("Camilla", "Garbett"));
+    userBulkRequest.add(createUserRequest("Hilaria", "Heather"));
+    userBulkRequest.add(createUserRequest("Bruno", "Wainwright"));
+    userBulkRequest.add(createUserRequest("Lane", "Fitzsimmons"));
+    userBulkRequest.add(createUserRequest("Katrina", "Loudon"));
+    userBulkRequest.add(createUserRequest("Sherie", "Alam"));
+    userBulkRequest.add(createUserRequest("Percy", "Fujimoto"));
+    userBulkRequest.add(createUserRequest("Alda", "Schroer"));
+    userBulkRequest.add(createUserRequest("Onie", "Aponte"));
+    userBulkRequest.add(createUserRequest("Maxima", "Figeroa"));
+    userBulkRequest.add(createUserRequest("Caridad", "Maurin"));
+    userBulkRequest.add(createUserRequest("Jaqueline", "Bellomy"));
+    userBulkRequest.add(createUserRequest("Pansy", "Joplin"));
+    userBulkRequest.add(createUserRequest("Verna", "Parish"));
+    userBulkRequest.add(createUserRequest("Denver", "Gaeta"));
+    userBulkRequest.add(createUserRequest("Hugh", "Mcfatridge"));
+    userBulkRequest.add(createUserRequest("Shavon", "Herren"));
+    userBulkRequest.add(createUserRequest("Dagny", "Predmore"));
+    userBulkRequest.add(createUserRequest("Jalisa", "Madkins"));
+    userBulkRequest.add(createUserRequest("Consuela", "Redondo"));
+    userBulkRequest.add(createUserRequest("Bethanie", "Getman"));
+    userBulkRequest.add(createUserRequest("Wilburn", "Santee"));
+    userBulkRequest.add(createUserRequest("Stephan", "Mcabee"));
+    userBulkRequest.add(createUserRequest("Alleen", "Faivre"));
+    userBulkRequest.add(createUserRequest("Elsy", "Kovacs"));
+    userBulkRequest.add(createUserRequest("Layla", "Ridgeway"));
+    userBulkRequest.add(createUserRequest("Carmelia", "Balser"));
+    userBulkRequest.add(createUserRequest("Rubin", "Marmon"));
+    userBulkRequest.add(createUserRequest("Felecia", "Desch"));
+    userBulkRequest.add(createUserRequest("Marty", "Stutes"));
+    userBulkRequest.add(createUserRequest("Ulrike", "Kimmer"));
+    userBulkRequest.add(createUserRequest("Gaye", "Seguin"));
+    userBulkRequest.add(createUserRequest("Audria", "Doane"));
+    userBulkRequest.add(createUserRequest("Jadwiga", "Northrop"));
+    userBulkRequest.add(createUserRequest("Evelynn", "Feagins"));
+    userBulkRequest.add(createUserRequest("Rosalie", "Higgin"));
+    userBulkRequest.add(createUserRequest("Pamelia", "Youmans"));
+    userBulkRequest.add(createUserRequest("Christinia", "Kleinman"));
+    userBulkRequest.add(createUserRequest("Raphael", "Hipsher"));
+    userBulkRequest.add(createUserRequest("Sherrill", "Melle"));
 
     elasticsearchClient.bulk(userBulkRequest, RequestOptions.DEFAULT);
 
@@ -149,6 +198,7 @@ public class StartUpService {
 
     csvReader.close();
 
+
     // randomly assigned users and books and actions
 
     // how am ig going to do it
@@ -157,7 +207,7 @@ public class StartUpService {
 
     // Create
 
-    // create 5000 activities lol this users are book addicts! -> they would only keep it for a
+    // Maximum of 5 books -> they would only keep it for a
     // maximum 30 days! I need to figure out reservations!
     // int i = 0;
     // while i <=5000
