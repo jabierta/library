@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.PostConstruct;
-import jdk.internal.net.http.common.Pair;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -29,6 +28,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -128,8 +128,7 @@ public class StartUpService {
           RequestOptions.DEFAULT);
     }
 
-    // Save the library right away
-    userBulkRequest.add(
+    elasticsearchClient.index(
         new IndexRequest("library")
             .source(
                 XContentType.JSON,
@@ -140,7 +139,8 @@ public class StartUpService {
                 "city",
                 "Abiertas",
                 "province",
-                "AWE"));
+                "AWE"),
+        RequestOptions.DEFAULT);
 
     // Find the Abiertas Library and use the _id to save books into it.
     SearchSourceBuilder getLibrarySearchSourceBuilder = new SearchSourceBuilder();
@@ -192,22 +192,34 @@ public class StartUpService {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
         // create books with weighted randomness for amount
-        int numBooks = (int) Math.floor(Math.abs( new Random().nextInt(1) - new Random().nextInt(1)) * (1 + maxBooks - minBooks) + minBooks);
-        bookBulkRequest.add(
-            createBookRequest(
-                data[0], data[1], simpleDateFormat.parse(data[2]), true, null, library.getId()));
+        int numBooks =
+            (int)
+                Math.floor(
+                    Math.abs(new Random().nextInt(1) - new Random().nextInt(1))
+                            * (1 + maxBooks - minBooks)
+                        + minBooks);
+        while (numBooks >= 1) {
+          bookBulkRequest.add(
+              createBookRequest(
+                  data[0], data[1], simpleDateFormat.parse(data[2]), true, null, library.getId()));
+          numBooks--;
+        }
       }
     }
     csvReader.close();
 
-    // Itterate through year 2021
-      for (day in year) {
-        itterate through each user if there are any books that are required to be returned if so add them to the array
-        itterate through each user and see if any of there reserved book is available to borrow add them to the array
-          if they have full inventory then they can either return 1 of there current used books or keep resrving
-        if size of array is less than 30 then add more users to borrow books
-      }
+    elasticsearchClient.bulk(bookBulkRequest, RequestOptions.DEFAULT);
 
+    //    // Itterate through year 2021
+    //      for (day in year) {
+    //        itterate through each user if there are any books that are required to be returned if
+    // so add them to the array
+    //        itterate through each user and see if any of there reserved book is available to
+    // borrow add them to the array
+    //          if they have full inventory then they can either return 1 of there current used
+    // books or keep resrving
+    //        if size of array is less than 30 then add more users to borrow books
+    //      }
 
   }
 
