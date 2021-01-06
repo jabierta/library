@@ -1,11 +1,14 @@
 package com.spring.examples.elasticsearch.service;
 
 import com.spring.examples.elasticsearch.domain.Library;
+import com.spring.examples.elasticsearch.domain.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +40,7 @@ public class StartUpService {
   private final ResourceLoader resourceLoader;
   private final RestHighLevelClient elasticsearchClient;
 
+  /*This method is not optimised and Big O notation is O(n^c)*/
   @PostConstruct
   private void initializeData() throws IOException, ParseException {
     BulkRequest userBulkRequest = new BulkRequest();
@@ -184,7 +188,8 @@ public class StartUpService {
     Map<Integer, Pair<List<String>, Boolean>> books = new HashMap<>();
 
     // Get current date
-    Date date
+    LocalDate date = LocalDate.now();
+    // how we going to create date Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     // Iterate through file and create books
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
@@ -203,17 +208,27 @@ public class StartUpService {
 
     elasticsearchClient.bulk(bookBulkRequest, RequestOptions.DEFAULT);
 
-    //    // Itterate through year 2021
-    //      for (day in year) {
-    //        itterate through each user if there are any books that are required to be returned if
-    // so add them to the array
-    //        itterate through each user and see if any of there reserved book is available to
-    // borrow add them to the array
-    //          if they have full inventory then they can either return 1 of there current used
-    // books or keep resrving
-    //        if size of array is less than 30 then add more users to borrow books
-    //      }
+        // Itterate through year 2021
 
+
+    for (int i = 365; i > 0; i-- ) {
+      int currentNumberOfUsersInLibraryToday = 0;
+      List<User> userList = new ArrayList<>();
+      for (int currentUserIndex = 0; ) {
+        Random random = new Random();
+        int swapLocation = Random.nextInt(userList.size()) + 1;
+        if () {
+          currentNumberOfUsersInLibraryToday++;
+        }
+      }
+      itterate through each user if there are any books that are required to be returned if so add them to the array
+      itterate through each user and see if any of there reserved book is available to
+      borrow add them to the array
+      if they have full inventory then they can either return 1 of there current used
+      books or keep resrving
+
+      if size of array is less than 30 then add more users to borrow books
+    }
   }
 
   private IndexRequest createUserRequest(String firstName, String lastName) {
