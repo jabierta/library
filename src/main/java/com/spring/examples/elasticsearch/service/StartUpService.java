@@ -182,22 +182,15 @@ public class StartUpService {
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
     Map<Integer, Pair<List<String>, Boolean>> books = new HashMap<>();
-    int maxBooks = 5;
-    int minBooks = 1;
 
     // Get current date
-
+    Date date
     // Iterate through file and create books
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
-        // create books with weighted randomness for amount
-        int numBooks =
-            (int)
-                Math.floor(
-                    Math.abs(new Random().nextInt(1) - new Random().nextInt(1))
-                            * (1 + maxBooks - minBooks)
-                        + minBooks);
+        int numBooks = new Random().nextInt(5) + 1;
+        System.out.println(numBooks);
         while (numBooks >= 1) {
           bookBulkRequest.add(
               createBookRequest(
