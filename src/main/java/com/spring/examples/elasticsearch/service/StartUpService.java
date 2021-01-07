@@ -1,6 +1,5 @@
 package com.spring.examples.elasticsearch.service;
 
-import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.Library;
 import com.spring.examples.elasticsearch.domain.User;
 import java.io.BufferedReader;
@@ -213,7 +212,8 @@ public class StartUpService {
 
     // Itterate through year 2021
     for (int i = 365; i >= 0; i--) {
-      List<User> usersToday = new ArrayList<>(); // if size is less than 20 then pick 20 random users
+      List<User> usersToday =
+          new ArrayList<>(); // if size is less than 20 then pick 20 random users
       SearchRequest userSearchRequest = new SearchRequest("user");
       SearchSourceBuilder userSearchSourceBuilder = new SearchSourceBuilder();
       userSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
@@ -231,8 +231,12 @@ public class StartUpService {
                 userHit.getId(),
                 (String) userHitSourceAsMap.get("firstName"),
                 (String) userHitSourceAsMap.get("lastName"),
-                (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks").toString(),
-                (List<String>) userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")));
+                // (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks.").toString()
+                null,
+                null
+                //                (List<String>)
+                // userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")
+                ));
       }
 
       // Randomize userList. I know Collection.shuffle would be a better implementation.
@@ -244,18 +248,18 @@ public class StartUpService {
         userList.set(swapLocation, currentUser);
       }
 
-      // Check if user has expired books
-      for (User user : userList) {
-        for (user.getIdsOfCurrentlyBorrowedBooks() >) {
+      //      // Check if user has expired books
+      //      for (User user : userList) {
+      //        for (user.getIdsOfCurrentlyBorrowedBooks() >) {
+      //
+      //        }
+      //      }
 
-        }
-      }
-
-      for (User user : userList) {
-        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
-          usersToday.add(user);
-        }
-      }
+      //      for (User user : userList) {
+      //        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
+      //          usersToday.add(user);
+      //        }
+      //      }
 
       //      itterate through each user if there are any books that are required to be returned if
       // so add them to the array
@@ -266,7 +270,7 @@ public class StartUpService {
       //
       //      if size of array is less than 30 then add more users to borrow books
 
-    //UPSERT FOR EACH USER in userList
+      // UPSERT FOR EACH USER in userList
     }
   }
 
