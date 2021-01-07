@@ -189,7 +189,8 @@ public class StartUpService {
 
     // Get current date
     LocalDate date = LocalDate.now();
-    // how we going to create date Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    // how we going to create date
+    // Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     // Iterate through file and create books
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
@@ -208,26 +209,45 @@ public class StartUpService {
 
     elasticsearchClient.bulk(bookBulkRequest, RequestOptions.DEFAULT);
 
-        // Itterate through year 2021
-
-
-    for (int i = 365; i > 0; i-- ) {
+    // Itterate through year 2021
+    for (int i = 365; i >= 0; i--) {
       int currentNumberOfUsersInLibraryToday = 0;
-      List<User> userList = new ArrayList<>();
-      for (int currentUserIndex = 0; ) {
-        Random random = new Random();
-        int swapLocation = Random.nextInt(userList.size()) + 1;
-        if () {
-          currentNumberOfUsersInLibraryToday++;
-        }
-      }
-      itterate through each user if there are any books that are required to be returned if so add them to the array
-      itterate through each user and see if any of there reserved book is available to
-      borrow add them to the array
-      if they have full inventory then they can either return 1 of there current used
-      books or keep resrving
+      SearchRequest userSearchRequest = new SearchRequest("user");
+      SearchSourceBuilder userSearchSourceBuilder = new SearchSourceBuilder();
+      userSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
+      userSearchSourceBuilder.size(1000);
+      userSearchRequest.source(userSearchSourceBuilder);
 
-      if size of array is less than 30 then add more users to borrow books
+      SearchResponse searchResponse =
+          elasticsearchClient.search(userSearchRequest, RequestOptions.DEFAULT);
+      List<User> userList = new ArrayList<>();
+
+      for (SearchHit userHit : searchResponse.getHits().getHits()) {
+        Map<String, Object> userHitSourceAsMap = userHit.getSourceAsMap();
+        userList.add(new User(
+            userHit.getId(),
+            (String) userHitSourceAsMap.get("firstName"),
+            (String) userHitSourceAsMap.get("lastName"),
+            (List<String>) userHitSourceAsMap.get("idsOfCurrentlyBorrowedBooks")));
+      }
+
+      // Randomize userList. I know Collection.shuffle would be a better implementation.
+      for (int currentUserIndex = 0; currentUserIndex <= userList.size(); currentUserIndex++) {
+        int swapLocation = new Random().nextInt(userList.size()) + 1;
+        User currentUser = userList.get(i);
+        User swappedUser = userList.get(swapLocation);
+        userList.set(i, swappedUser);
+        userList.set(swapLocation, currentUser);
+      }
+
+      //      itterate through each user if there are any books that are required to be returned if
+      // so add them to the array
+      //      itterate through each user and see if any of there reserved book is available to
+      //      borrow add them to the array
+      //      if they have full inventory then they can either return 1 of there current used
+      //      books or keep resrving
+      //
+      //      if size of array is less than 30 then add more users to borrow books
     }
   }
 

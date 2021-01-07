@@ -81,8 +81,7 @@ public class UserService {
                             hit.getId(),
                             (String) hit.getSourceAsMap().get("firstName"),
                             (String) hit.getSourceAsMap().get("lastName"),
-                            (List<String>)
-                                hit.getSourceAsMap().get("idsOfCurrentlyBorrowedBooks")))
+                            (List<String>) hit.getSourceAsMap().get("idsOfCurrentlyBorrowedBooks")))
                 .collect(Collectors.toList()));
 
         scrollId = searchResponse.getScrollId();
