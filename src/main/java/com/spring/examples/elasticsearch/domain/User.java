@@ -15,5 +15,6 @@ public class User {
   @Id private String id;
   private String firstName;
   private String lastName;
-  private List<String> idsOfCurrentlyBorrowedBooks;
+  private List<BookRecord> currentlyBorrowedBooks;
+  private List<BookRecord> currentlyReservedBooks;
 }

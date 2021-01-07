@@ -1,5 +1,6 @@
 package com.spring.examples.elasticsearch.service;
 
+import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.Library;
 import com.spring.examples.elasticsearch.domain.User;
 import java.io.BufferedReader;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+// Create conditional property to run or not
 public class StartUpService {
   private final ResourceLoader resourceLoader;
   private final RestHighLevelClient elasticsearchClient;
@@ -211,7 +213,7 @@ public class StartUpService {
 
     // Itterate through year 2021
     for (int i = 365; i >= 0; i--) {
-      int currentNumberOfUsersInLibraryToday = 0;
+      List<User> usersToday = new ArrayList<>(); // if size is less than 20 then pick 20 random users
       SearchRequest userSearchRequest = new SearchRequest("user");
       SearchSourceBuilder userSearchSourceBuilder = new SearchSourceBuilder();
       userSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
@@ -224,11 +226,13 @@ public class StartUpService {
 
       for (SearchHit userHit : searchResponse.getHits().getHits()) {
         Map<String, Object> userHitSourceAsMap = userHit.getSourceAsMap();
-        userList.add(new User(
-            userHit.getId(),
-            (String) userHitSourceAsMap.get("firstName"),
-            (String) userHitSourceAsMap.get("lastName"),
-            (List<String>) userHitSourceAsMap.get("idsOfCurrentlyBorrowedBooks")));
+        userList.add(
+            new User(
+                userHit.getId(),
+                (String) userHitSourceAsMap.get("firstName"),
+                (String) userHitSourceAsMap.get("lastName"),
+                (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks").toString(),
+                (List<String>) userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")));
       }
 
       // Randomize userList. I know Collection.shuffle would be a better implementation.
@@ -240,14 +244,29 @@ public class StartUpService {
         userList.set(swapLocation, currentUser);
       }
 
+      // Check if user has expired books
+      for (User user : userList) {
+        for (user.getIdsOfCurrentlyBorrowedBooks() >) {
+
+        }
+      }
+
+      for (User user : userList) {
+        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
+          usersToday.add(user);
+        }
+      }
+
       //      itterate through each user if there are any books that are required to be returned if
       // so add them to the array
-      //      itterate through each user and see if any of there reserved book is available to
+      //      ittterate through each user and see if any of there reserved book is available to
       //      borrow add them to the array
       //      if they have full inventory then they can either return 1 of there current used
       //      books or keep resrving
       //
       //      if size of array is less than 30 then add more users to borrow books
+
+    //UPSERT FOR EACH USER in userList
     }
   }
 
