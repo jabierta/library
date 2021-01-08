@@ -2,6 +2,7 @@ package com.spring.examples.elasticsearch.service;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
+import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.User;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ public class UserService {
     User user = new User();
     user.setFirstName(firstName);
     user.setLastName(lastName);
-    user.setCurrentlyBorrowedBooks(new ArrayList<>());
-    user.setCurrentlyReservedBooks(new ArrayList<>());
+    user.setCurrentlyBorrowedBooks(new ArrayList<BookRecord>());
+    user.setCurrentlyReservedBooks(new ArrayList<BookRecord>());
     try {
       return elasticsearchOperations.save(user);
 

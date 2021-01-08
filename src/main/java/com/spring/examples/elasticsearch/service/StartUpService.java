@@ -1,5 +1,7 @@
 package com.spring.examples.elasticsearch.service;
 
+import com.spring.examples.elasticsearch.domain.Activity;
+import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.Library;
 import com.spring.examples.elasticsearch.domain.User;
 import java.io.BufferedReader;
@@ -8,6 +10,7 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -189,19 +192,18 @@ public class StartUpService {
     Map<Integer, Pair<List<String>, Boolean>> books = new HashMap<>();
 
     // Get current date
-    LocalDate date = LocalDate.now();
+    LocalDate localDate = LocalDate.now();
     // how we going to create date
-    // Date.from(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    Date date = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     // Iterate through file and create books
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
         int numBooks = new Random().nextInt(5) + 1;
-        System.out.println(numBooks);
         while (numBooks >= 1) {
           bookBulkRequest.add(
               createBookRequest(
-                  data[0], data[1], simpleDateFormat.parse(data[2]), true, null, library.getId()));
+                  data[0], data[1], simpleDateFormat.parse(data[2]), true, date, library.getId()));
           numBooks--;
         }
       }
@@ -209,7 +211,7 @@ public class StartUpService {
     csvReader.close();
 
     elasticsearchClient.bulk(bookBulkRequest, RequestOptions.DEFAULT);
-
+    Date dateToday = date;
     // Itterate through year 2021
     for (int i = 365; i >= 0; i--) {
       List<User> usersToday =
@@ -226,17 +228,17 @@ public class StartUpService {
 
       for (SearchHit userHit : searchResponse.getHits().getHits()) {
         Map<String, Object> userHitSourceAsMap = userHit.getSourceAsMap();
+        User user = new User();
+        user.setId(userHit.getId());
+        user.setFirstName((String) userHitSourceAsMap.get("firstName"));
+        user.setLastName((String) userHitSourceAsMap.get("lastName"));
         userList.add(
             new User(
                 userHit.getId(),
                 (String) userHitSourceAsMap.get("firstName"),
                 (String) userHitSourceAsMap.get("lastName"),
-                // (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks.").toString()
-                null,
-                null
-                //                (List<String>)
-                // userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")
-                ));
+                (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks."),
+                (List<BookRecord>) userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")));
       }
 
       // Randomize userList. I know Collection.shuffle would be a better implementation.
@@ -248,12 +250,22 @@ public class StartUpService {
         userList.set(swapLocation, currentUser);
       }
 
-      //      // Check if user has expired books
-      //      for (User user : userList) {
-      //        for (user.getIdsOfCurrentlyBorrowedBooks() >) {
-      //
-      //        }
-      //      }
+      // Check if user has expired books
+      for (User user : userList) {
+        boolean hasToReturnBook = false;
+        for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
+          if (bookRecord.getReturnDate().equals(dateToday)) {
+           this.
+
+            // update
+            hasToReturnBook = true;
+          }
+        }
+
+        if (hasToReturnBook) {
+          usersToday.add(user);
+        }
+      }
 
       //      for (User user : userList) {
       //        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
@@ -271,12 +283,23 @@ public class StartUpService {
       //      if size of array is less than 30 then add more users to borrow books
 
       // UPSERT FOR EACH USER in userList
+      localDate = localDate.plusDays(1);
+      dateToday = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
   }
 
   private IndexRequest createUserRequest(String firstName, String lastName) {
     return new IndexRequest("user")
-        .source(XContentType.JSON, "firstName", firstName, "lastName", lastName);
+        .source(
+            XContentType.JSON,
+            "firstName",
+            firstName,
+            "lastName",
+            lastName,
+            "currentlyBorrowedBooks",
+            new ArrayList<BookRecord>(),
+            "currentlyReservedBooks",
+            new ArrayList<BookRecord>());
   }
 
   private IndexRequest createBookRequest(

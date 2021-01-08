@@ -1,5 +1,6 @@
 package com.spring.examples.elasticsearch.service;
 
-public class ActivityService {
+import org.springframework.stereotype.Service;
 
-}
+@Service
+public class ActivityService {}
