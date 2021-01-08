@@ -330,6 +330,7 @@ public class StartUpService {
             libraryId);
   }
 
+//TODO: Create activity update!
   private IndexRequest createActivityRequest(){return null;}
 
   private UpdateRequest updateBookRequest() {return null; }
