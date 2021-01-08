@@ -258,8 +258,8 @@ public class StartUpService {
         boolean hasToReturnBook = false;
         for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
           if (bookRecord.getReturnDate().equals(dateToday)) {
-           this.createActivityRequest();
-           this.updateBookRequest();
+            //            this.createActivityRequest();
+            //            this.updateBookRequest();
             hasToReturnBook = true;
           }
         }
@@ -330,8 +330,26 @@ public class StartUpService {
             libraryId);
   }
 
-//TODO: Create activity update!
-  private IndexRequest createActivityRequest(){return null;}
+  // TODO: Create activity update!
+  private IndexRequest createActivityRequest(
+      String activityType, Date activityDate, String userId, String bookId, String libraryId) {
 
-  private UpdateRequest updateBookRequest() {return null; }
+    return new IndexRequest("activity")
+        .source(
+            XContentType.JSON,
+            "activityType",
+            activityType,
+            "activityDate",
+            activityDate,
+            "userId",
+            userId,
+            "bookId",
+            bookId,
+            "libraryId",
+            libraryId);
+  }
+
+  private UpdateRequest updateBookRequest() {
+    return null;
+  }
 }
