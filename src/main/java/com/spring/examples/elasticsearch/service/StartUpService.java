@@ -1,6 +1,5 @@
 package com.spring.examples.elasticsearch.service;
 
-import com.spring.examples.elasticsearch.domain.Activity;
 import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.Library;
 import com.spring.examples.elasticsearch.domain.User;
@@ -23,6 +22,7 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -47,7 +47,7 @@ public class StartUpService {
   /*This method is not optimised and Big O notation is O(n^c)*/
   @PostConstruct
   private void initializeData() throws IOException, ParseException {
-    BulkRequest userBulkRequest = new BulkRequest();
+    BulkRequest createUserBulkRequest = new BulkRequest();
 
     // Delete existing user index and creates an empty user index
     if (!elasticsearchClient
@@ -60,68 +60,68 @@ public class StartUpService {
           RequestOptions.DEFAULT);
     }
 
-    userBulkRequest.add(createUserRequest("John", "Doe"));
-    userBulkRequest.add(createUserRequest("Jane", "Doe"));
-    userBulkRequest.add(createUserRequest("Mark", "Doe"));
-    userBulkRequest.add(createUserRequest("Mills", "Doe"));
-    userBulkRequest.add(createUserRequest("Ian", "Deer"));
-    userBulkRequest.add(createUserRequest("Anna", "Deer"));
-    userBulkRequest.add(createUserRequest("Anthony", "Deer"));
-    userBulkRequest.add(createUserRequest("Josh", "Smith"));
-    userBulkRequest.add(createUserRequest("Jenny", "Smith"));
-    userBulkRequest.add(createUserRequest("Jack", "Mason"));
-    userBulkRequest.add(createUserRequest("Alex", "Mason"));
-    userBulkRequest.add(createUserRequest("Rafael", "Dore"));
-    userBulkRequest.add(createUserRequest("Cinda", "Mallari"));
-    userBulkRequest.add(createUserRequest("Dani", "Waits"));
-    userBulkRequest.add(createUserRequest("Salley", "Holdridge"));
-    userBulkRequest.add(createUserRequest("Gertrudis", "Rentschler"));
-    userBulkRequest.add(createUserRequest("Marylin", "Giddings"));
-    userBulkRequest.add(createUserRequest("Reita", "Beltrami"));
-    userBulkRequest.add(createUserRequest("Carley", "Howton"));
-    userBulkRequest.add(createUserRequest("Marco", "Serafini"));
-    userBulkRequest.add(createUserRequest("Camilla", "Garbett"));
-    userBulkRequest.add(createUserRequest("Hilaria", "Heather"));
-    userBulkRequest.add(createUserRequest("Bruno", "Wainwright"));
-    userBulkRequest.add(createUserRequest("Lane", "Fitzsimmons"));
-    userBulkRequest.add(createUserRequest("Katrina", "Loudon"));
-    userBulkRequest.add(createUserRequest("Sherie", "Alam"));
-    userBulkRequest.add(createUserRequest("Percy", "Fujimoto"));
-    userBulkRequest.add(createUserRequest("Alda", "Schroer"));
-    userBulkRequest.add(createUserRequest("Onie", "Aponte"));
-    userBulkRequest.add(createUserRequest("Maxima", "Figeroa"));
-    userBulkRequest.add(createUserRequest("Caridad", "Maurin"));
-    userBulkRequest.add(createUserRequest("Jaqueline", "Bellomy"));
-    userBulkRequest.add(createUserRequest("Pansy", "Joplin"));
-    userBulkRequest.add(createUserRequest("Verna", "Parish"));
-    userBulkRequest.add(createUserRequest("Denver", "Gaeta"));
-    userBulkRequest.add(createUserRequest("Hugh", "Mcfatridge"));
-    userBulkRequest.add(createUserRequest("Shavon", "Herren"));
-    userBulkRequest.add(createUserRequest("Dagny", "Predmore"));
-    userBulkRequest.add(createUserRequest("Jalisa", "Madkins"));
-    userBulkRequest.add(createUserRequest("Consuela", "Redondo"));
-    userBulkRequest.add(createUserRequest("Bethanie", "Getman"));
-    userBulkRequest.add(createUserRequest("Wilburn", "Santee"));
-    userBulkRequest.add(createUserRequest("Stephan", "Mcabee"));
-    userBulkRequest.add(createUserRequest("Alleen", "Faivre"));
-    userBulkRequest.add(createUserRequest("Elsy", "Kovacs"));
-    userBulkRequest.add(createUserRequest("Layla", "Ridgeway"));
-    userBulkRequest.add(createUserRequest("Carmelia", "Balser"));
-    userBulkRequest.add(createUserRequest("Rubin", "Marmon"));
-    userBulkRequest.add(createUserRequest("Felecia", "Desch"));
-    userBulkRequest.add(createUserRequest("Marty", "Stutes"));
-    userBulkRequest.add(createUserRequest("Ulrike", "Kimmer"));
-    userBulkRequest.add(createUserRequest("Gaye", "Seguin"));
-    userBulkRequest.add(createUserRequest("Audria", "Doane"));
-    userBulkRequest.add(createUserRequest("Jadwiga", "Northrop"));
-    userBulkRequest.add(createUserRequest("Evelynn", "Feagins"));
-    userBulkRequest.add(createUserRequest("Rosalie", "Higgin"));
-    userBulkRequest.add(createUserRequest("Pamelia", "Youmans"));
-    userBulkRequest.add(createUserRequest("Christinia", "Kleinman"));
-    userBulkRequest.add(createUserRequest("Raphael", "Hipsher"));
-    userBulkRequest.add(createUserRequest("Sherrill", "Melle"));
+    createUserBulkRequest.add(createUserRequest("John", "Doe"));
+    createUserBulkRequest.add(createUserRequest("Jane", "Doe"));
+    createUserBulkRequest.add(createUserRequest("Mark", "Doe"));
+    createUserBulkRequest.add(createUserRequest("Mills", "Doe"));
+    createUserBulkRequest.add(createUserRequest("Ian", "Deer"));
+    createUserBulkRequest.add(createUserRequest("Anna", "Deer"));
+    createUserBulkRequest.add(createUserRequest("Anthony", "Deer"));
+    createUserBulkRequest.add(createUserRequest("Josh", "Smith"));
+    createUserBulkRequest.add(createUserRequest("Jenny", "Smith"));
+    createUserBulkRequest.add(createUserRequest("Jack", "Mason"));
+    createUserBulkRequest.add(createUserRequest("Alex", "Mason"));
+    createUserBulkRequest.add(createUserRequest("Rafael", "Dore"));
+    createUserBulkRequest.add(createUserRequest("Cinda", "Mallari"));
+    createUserBulkRequest.add(createUserRequest("Dani", "Waits"));
+    createUserBulkRequest.add(createUserRequest("Salley", "Holdridge"));
+    createUserBulkRequest.add(createUserRequest("Gertrudis", "Rentschler"));
+    createUserBulkRequest.add(createUserRequest("Marylin", "Giddings"));
+    createUserBulkRequest.add(createUserRequest("Reita", "Beltrami"));
+    createUserBulkRequest.add(createUserRequest("Carley", "Howton"));
+    createUserBulkRequest.add(createUserRequest("Marco", "Serafini"));
+    createUserBulkRequest.add(createUserRequest("Camilla", "Garbett"));
+    createUserBulkRequest.add(createUserRequest("Hilaria", "Heather"));
+    createUserBulkRequest.add(createUserRequest("Bruno", "Wainwright"));
+    createUserBulkRequest.add(createUserRequest("Lane", "Fitzsimmons"));
+    createUserBulkRequest.add(createUserRequest("Katrina", "Loudon"));
+    createUserBulkRequest.add(createUserRequest("Sherie", "Alam"));
+    createUserBulkRequest.add(createUserRequest("Percy", "Fujimoto"));
+    createUserBulkRequest.add(createUserRequest("Alda", "Schroer"));
+    createUserBulkRequest.add(createUserRequest("Onie", "Aponte"));
+    createUserBulkRequest.add(createUserRequest("Maxima", "Figeroa"));
+    createUserBulkRequest.add(createUserRequest("Caridad", "Maurin"));
+    createUserBulkRequest.add(createUserRequest("Jaqueline", "Bellomy"));
+    createUserBulkRequest.add(createUserRequest("Pansy", "Joplin"));
+    createUserBulkRequest.add(createUserRequest("Verna", "Parish"));
+    createUserBulkRequest.add(createUserRequest("Denver", "Gaeta"));
+    createUserBulkRequest.add(createUserRequest("Hugh", "Mcfatridge"));
+    createUserBulkRequest.add(createUserRequest("Shavon", "Herren"));
+    createUserBulkRequest.add(createUserRequest("Dagny", "Predmore"));
+    createUserBulkRequest.add(createUserRequest("Jalisa", "Madkins"));
+    createUserBulkRequest.add(createUserRequest("Consuela", "Redondo"));
+    createUserBulkRequest.add(createUserRequest("Bethanie", "Getman"));
+    createUserBulkRequest.add(createUserRequest("Wilburn", "Santee"));
+    createUserBulkRequest.add(createUserRequest("Stephan", "Mcabee"));
+    createUserBulkRequest.add(createUserRequest("Alleen", "Faivre"));
+    createUserBulkRequest.add(createUserRequest("Elsy", "Kovacs"));
+    createUserBulkRequest.add(createUserRequest("Layla", "Ridgeway"));
+    createUserBulkRequest.add(createUserRequest("Carmelia", "Balser"));
+    createUserBulkRequest.add(createUserRequest("Rubin", "Marmon"));
+    createUserBulkRequest.add(createUserRequest("Felecia", "Desch"));
+    createUserBulkRequest.add(createUserRequest("Marty", "Stutes"));
+    createUserBulkRequest.add(createUserRequest("Ulrike", "Kimmer"));
+    createUserBulkRequest.add(createUserRequest("Gaye", "Seguin"));
+    createUserBulkRequest.add(createUserRequest("Audria", "Doane"));
+    createUserBulkRequest.add(createUserRequest("Jadwiga", "Northrop"));
+    createUserBulkRequest.add(createUserRequest("Evelynn", "Feagins"));
+    createUserBulkRequest.add(createUserRequest("Rosalie", "Higgin"));
+    createUserBulkRequest.add(createUserRequest("Pamelia", "Youmans"));
+    createUserBulkRequest.add(createUserRequest("Christinia", "Kleinman"));
+    createUserBulkRequest.add(createUserRequest("Raphael", "Hipsher"));
+    createUserBulkRequest.add(createUserRequest("Sherrill", "Melle"));
 
-    elasticsearchClient.bulk(userBulkRequest, RequestOptions.DEFAULT);
+    elasticsearchClient.bulk(createUserBulkRequest, RequestOptions.DEFAULT);
 
     // Delete existing library index and creates an empty library index
     if (!elasticsearchClient
@@ -211,9 +211,12 @@ public class StartUpService {
     csvReader.close();
 
     elasticsearchClient.bulk(bookBulkRequest, RequestOptions.DEFAULT);
+
     Date dateToday = date;
-    // Itterate through year 2021
     for (int i = 365; i >= 0; i--) {
+      BulkRequest bookAndActivityBulkRequest = new BulkRequest();
+      BulkRequest userBulkRequest = new BulkRequest();
+
       List<User> usersToday =
           new ArrayList<>(); // if size is less than 20 then pick 20 random users
       SearchRequest userSearchRequest = new SearchRequest("user");
@@ -255,9 +258,8 @@ public class StartUpService {
         boolean hasToReturnBook = false;
         for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
           if (bookRecord.getReturnDate().equals(dateToday)) {
-           this.
-
-            // update
+           this.createActivityRequest();
+           this.updateBookRequest();
             hasToReturnBook = true;
           }
         }
@@ -285,6 +287,8 @@ public class StartUpService {
       // UPSERT FOR EACH USER in userList
       localDate = localDate.plusDays(1);
       dateToday = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+
+      elasticsearchClient.bulk(bookAndActivityBulkRequest, RequestOptions.DEFAULT);
     }
   }
 
@@ -325,4 +329,8 @@ public class StartUpService {
             "libraryId",
             libraryId);
   }
+
+  private IndexRequest createActivityRequest(){return null;}
+
+  private UpdateRequest updateBookRequest() {return null; }
 }
