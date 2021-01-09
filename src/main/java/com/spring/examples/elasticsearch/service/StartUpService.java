@@ -248,7 +248,7 @@ public class StartUpService {
                 userHit.getId(),
                 (String) userHitSourceAsMap.get("firstName"),
                 (String) userHitSourceAsMap.get("lastName"),
-                (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks."),
+                (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks"),
                 (List<BookRecord>) userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")));
       }
 
@@ -261,9 +261,11 @@ public class StartUpService {
         userList.set(swapLocation, currentUser);
       }
 
-      // Check if user has expired books
+      // Check
       for (User user : userList) {
         List<String> idsOfReturnedBooks = new ArrayList<>();
+
+        //if there are any expired books
         for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
           if (bookRecord.getReturnDate().equals(dateToday)) {
             bookAndActivityBulkRequest.add(
@@ -287,19 +289,21 @@ public class StartUpService {
           user.setCurrentlyBorrowedBooks(bookRecords);
         }
 
+        List<String> removeThisFromReservedBooks = new ArrayList<>();
+        // If there are room to borrow more books
         if (user.getCurrentlyBorrowedBooks().size() < 5) {
           for (BookRecord bookRecord : user.getCurrentlyReservedBooks()) {
-            if (user.getCurrentlyReservedBooks().size() >= 5) {
+            if (user.getCurrentlyBorrowedBooks().size() >= 5) {
               break;
             }
-            SearchSourceBuilder getBookByIdSearchSourceBuilder = new SearchSourceBuilder();
 
-            getBookByIdSearchSourceBuilder
-                .query(
-                    QueryBuilders.boolQuery()
-                        .must(QueryBuilders.matchQuery("_id", bookRecord.getBookId()))
-                        .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)))
-                .size(1);
+            SearchSourceBuilder getBookByIdSearchSourceBuilder =
+                new SearchSourceBuilder()
+                    .query(
+                        QueryBuilders.boolQuery()
+                            .must(QueryBuilders.matchQuery("_id", bookRecord.getBookId()))
+                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)))
+                    .size(1);
 
             SearchResponse bookResponse =
                 elasticsearchClient.search(
@@ -311,7 +315,7 @@ public class StartUpService {
 
               bookAndActivityBulkRequest.add(
                   this.createActivityRequest(
-                      Action.CHECKEDIN.toString(),
+                      Action.CHECKEDOUT.toString(),
                       dateToday,
                       user.getId(),
                       bookRecord.getBookId(),
@@ -338,9 +342,27 @@ public class StartUpService {
                               .atStartOfDay()
                               .atZone(ZoneId.systemDefault())
                               .toInstant())));
+
+              user.setCurrentlyBorrowedBooks(bookRecords);
+
+              removeThisFromReservedBooks.add(bookRecord.getBookId());
             }
           }
         }
+
+        if (removeThisFromReservedBooks.size() > 0) {
+          List<BookRecord> bookRecords =
+              user.getCurrentlyBorrowedBooks().stream()
+                  .filter(br -> !removeThisFromReservedBooks.contains(br.getBookId()))
+                  .collect(Collectors.toList());
+          user.setCurrentlyReservedBooks(bookRecords);
+        }
+
+        //
+        if (user.get() <5) {
+
+        }
+
 
         // reserve
         // if they don't have anything reserved then just borrow books and
@@ -356,14 +378,6 @@ public class StartUpService {
 
       } // END OF USER LOOP
 
-      //      for (User user : userList) {
-      //        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
-      //          usersToday.add(user);
-      //        }
-      //      }
-
-      //      itterate through each user if there are any books that are required to be returned if
-      // so add them to the array
       //      ittterate through each user and see if any of there reserved book is available to
       //      borrow add them to the array
       //      if they have full inventory then they can either return 1 of there current used
