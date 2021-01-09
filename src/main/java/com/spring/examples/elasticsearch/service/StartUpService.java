@@ -349,7 +349,14 @@ public class StartUpService {
             libraryId);
   }
 
-  private UpdateRequest updateBookRequest() {
-    return null;
+  private UpdateRequest updateBookRequest(
+      String bookId, Date nextAvailability, Boolean isAvailableToBorrow) {
+    UpdateRequest request = new UpdateRequest("book", bookId);
+
+    Map<String, Object> jsonMap = new HashMap<>();
+    jsonMap.put("nextAvailability", nextAvailability);
+    jsonMap.put("isAvailableToBorrow", isAvailableToBorrow);
+
+    return request.doc(jsonMap);
   }
 }
