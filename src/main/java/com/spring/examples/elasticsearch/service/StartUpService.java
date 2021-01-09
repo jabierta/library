@@ -1,5 +1,6 @@
 package com.spring.examples.elasticsearch.service;
 
+import com.spring.examples.elasticsearch.domain.Action;
 import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.Library;
 import com.spring.examples.elasticsearch.domain.User;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 // Create conditional property to run or not
+// This is a Frankenstein
 public class StartUpService {
   private final ResourceLoader resourceLoader;
   private final RestHighLevelClient elasticsearchClient;
@@ -214,6 +217,8 @@ public class StartUpService {
 
     Date dateToday = date;
     for (int i = 365; i >= 0; i--) {
+      Date dateTomorrow =
+          Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
       BulkRequest bookAndActivityBulkRequest = new BulkRequest();
       BulkRequest userBulkRequest = new BulkRequest();
 
@@ -255,19 +260,53 @@ public class StartUpService {
 
       // Check if user has expired books
       for (User user : userList) {
-        boolean hasToReturnBook = false;
+
+        List<String> idsOfReturnedBooks = new ArrayList<>();
         for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
           if (bookRecord.getReturnDate().equals(dateToday)) {
-            //            this.createActivityRequest();
-            //            this.updateBookRequest();
-            hasToReturnBook = true;
+            bookAndActivityBulkRequest.add(
+                this.createActivityRequest(
+                    Action.CHECKEDIN.toString(),
+                    dateToday,
+                    user.getId(),
+                    bookRecord.getBookId(),
+                    library.getId()));
+            bookAndActivityBulkRequest.add(
+                this.updateBookRequest(bookRecord.getBookId(), dateTomorrow, true));
+            idsOfReturnedBooks.add(bookRecord.getBookId());
           }
         }
-
-        if (hasToReturnBook) {
-          usersToday.add(user);
+        if (idsOfReturnedBooks.size() > 0) {
+          List<BookRecord> bookRecords =
+              user.getCurrentlyBorrowedBooks().stream()
+                  .filter(br -> !idsOfReturnedBooks.contains(br.getBookId()))
+                  .collect(Collectors.toList());
+          user.setCurrentlyBorrowedBooks(bookRecords);
         }
-      }
+
+        // if they have room they will try and get new books they have reserved
+        if (user.getCurrentlyBorrowedBooks().size() < 5) {
+          for (BookRecord bookRecord : user.getCurrentlyReservedBooks()) {
+            // Search for this particular book and see if its available
+            // if its available then borrow
+          }
+
+        }
+
+
+          // reserve
+          // if they don't have anything reserved then just borrow books and
+          // reserve books -> can you reserve a book that is already available?
+
+          // if reserve is
+
+          //          if (user.getCurrentlyBorrowedBooks() < 5) {
+          // Search searchForBooks that are available
+          //          }
+
+          // add this user to request update
+
+      }// END OF USER LOOP
 
       //      for (User user : userList) {
       //        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
@@ -286,7 +325,7 @@ public class StartUpService {
 
       // UPSERT FOR EACH USER in userList
       localDate = localDate.plusDays(1);
-      dateToday = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+      dateToday = dateTomorrow;
 
       elasticsearchClient.bulk(bookAndActivityBulkRequest, RequestOptions.DEFAULT);
     }
