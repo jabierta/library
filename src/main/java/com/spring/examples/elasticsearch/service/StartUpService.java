@@ -161,7 +161,8 @@ public class StartUpService {
 
     SearchResponse getLibrarySearchResponse =
         elasticsearchClient.search(
-            new SearchRequest().source(getLibrarySearchSourceBuilder), RequestOptions.DEFAULT);
+            new SearchRequest("library").source(getLibrarySearchSourceBuilder),
+            RequestOptions.DEFAULT);
 
     SearchHit searchHit = getLibrarySearchResponse.getHits().getHits()[0];
     Map<String, Object> sourceAsMap = searchHit.getSourceAsMap();
@@ -218,7 +219,8 @@ public class StartUpService {
     Date dateToday = date;
     for (int i = 365; i >= 0; i--) {
       Date dateTomorrow =
-          Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+          Date.from(
+              localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
       BulkRequest bookAndActivityBulkRequest = new BulkRequest();
       BulkRequest userBulkRequest = new BulkRequest();
 
@@ -232,6 +234,7 @@ public class StartUpService {
 
       SearchResponse searchResponse =
           elasticsearchClient.search(userSearchRequest, RequestOptions.DEFAULT);
+
       List<User> userList = new ArrayList<>();
 
       for (SearchHit userHit : searchResponse.getHits().getHits()) {
@@ -260,7 +263,6 @@ public class StartUpService {
 
       // Check if user has expired books
       for (User user : userList) {
-
         List<String> idsOfReturnedBooks = new ArrayList<>();
         for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
           if (bookRecord.getReturnDate().equals(dateToday)) {
@@ -276,6 +278,7 @@ public class StartUpService {
             idsOfReturnedBooks.add(bookRecord.getBookId());
           }
         }
+
         if (idsOfReturnedBooks.size() > 0) {
           List<BookRecord> bookRecords =
               user.getCurrentlyBorrowedBooks().stream()
@@ -284,29 +287,74 @@ public class StartUpService {
           user.setCurrentlyBorrowedBooks(bookRecords);
         }
 
-        // if they have room they will try and get new books they have reserved
         if (user.getCurrentlyBorrowedBooks().size() < 5) {
           for (BookRecord bookRecord : user.getCurrentlyReservedBooks()) {
-            // Search for this particular book and see if its available
-            // if its available then borrow
-          }
+            if (user.getCurrentlyReservedBooks().size() >= 5) {
+              break;
+            }
+            SearchSourceBuilder getBookByIdSearchSourceBuilder = new SearchSourceBuilder();
 
+            getBookByIdSearchSourceBuilder
+                .query(
+                    QueryBuilders.boolQuery()
+                        .must(QueryBuilders.matchQuery("_id", bookRecord.getBookId()))
+                        .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)))
+                .size(1);
+
+            SearchResponse bookResponse =
+                elasticsearchClient.search(
+                    new SearchRequest("book").source(getBookByIdSearchSourceBuilder),
+                    RequestOptions.DEFAULT);
+
+            if (bookResponse.getHits().getTotalHits().value == 1
+                && user.getCurrentlyReservedBooks().size() < 5) {
+
+              bookAndActivityBulkRequest.add(
+                  this.createActivityRequest(
+                      Action.CHECKEDIN.toString(),
+                      dateToday,
+                      user.getId(),
+                      bookRecord.getBookId(),
+                      library.getId()));
+
+              bookAndActivityBulkRequest.add(
+                  this.updateBookRequest(
+                      bookRecord.getBookId(),
+                      Date.from(
+                          localDate
+                              .plusDays(11)
+                              .atStartOfDay()
+                              .atZone(ZoneId.systemDefault())
+                              .toInstant()),
+                      true));
+
+              List<BookRecord> bookRecords = user.getCurrentlyBorrowedBooks();
+              bookRecords.add(
+                  new BookRecord(
+                      bookRecord.getBookId(),
+                      Date.from(
+                          localDate
+                              .plusDays(10)
+                              .atStartOfDay()
+                              .atZone(ZoneId.systemDefault())
+                              .toInstant())));
+            }
+          }
         }
 
+        // reserve
+        // if they don't have anything reserved then just borrow books and
+        // reserve books -> can you reserve a book that is already available?
 
-          // reserve
-          // if they don't have anything reserved then just borrow books and
-          // reserve books -> can you reserve a book that is already available?
+        // if reserve is
 
-          // if reserve is
+        //          if (user.getCurrentlyBorrowedBooks() < 5) {
+        // Search searchForBooks that are available
+        //          }
 
-          //          if (user.getCurrentlyBorrowedBooks() < 5) {
-          // Search searchForBooks that are available
-          //          }
+        // add this user to request update
 
-          // add this user to request update
-
-      }// END OF USER LOOP
+      } // END OF USER LOOP
 
       //      for (User user : userList) {
       //        if (!(user.getIdsOfCurrentlyBorrowedBooks().size() > 5)) {
