@@ -29,8 +29,10 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -224,8 +226,7 @@ public class StartUpService {
       BulkRequest bookAndActivityBulkRequest = new BulkRequest();
       BulkRequest userBulkRequest = new BulkRequest();
 
-      List<User> usersToday =
-          new ArrayList<>(); // if size is less than 20 then pick 20 random users
+      HashMap<String, User> usersToday = new HashMap<>();
       SearchRequest userSearchRequest = new SearchRequest("user");
       SearchSourceBuilder userSearchSourceBuilder = new SearchSourceBuilder();
       userSearchSourceBuilder.query(QueryBuilders.matchAllQuery());
@@ -235,8 +236,8 @@ public class StartUpService {
       SearchResponse searchResponse =
           elasticsearchClient.search(userSearchRequest, RequestOptions.DEFAULT);
 
+      // Get users
       List<User> userList = new ArrayList<>();
-
       for (SearchHit userHit : searchResponse.getHits().getHits()) {
         Map<String, Object> userHitSourceAsMap = userHit.getSourceAsMap();
         User user = new User();
@@ -261,11 +262,11 @@ public class StartUpService {
         userList.set(swapLocation, currentUser);
       }
 
-      // Check
+      // Loop through each user. And check if anyone has to return a book
       for (User user : userList) {
         List<String> idsOfReturnedBooks = new ArrayList<>();
 
-        //if there are any expired books
+        // if there are any expired books then return it.
         for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
           if (bookRecord.getReturnDate().equals(dateToday)) {
             bookAndActivityBulkRequest.add(
@@ -287,10 +288,12 @@ public class StartUpService {
                   .filter(br -> !idsOfReturnedBooks.contains(br.getBookId()))
                   .collect(Collectors.toList());
           user.setCurrentlyBorrowedBooks(bookRecords);
+        } else {
+          break;
         }
 
+        // If there are room to borrow more books then borrow it.
         List<String> removeThisFromReservedBooks = new ArrayList<>();
-        // If there are room to borrow more books
         if (user.getCurrentlyBorrowedBooks().size() < 5) {
           for (BookRecord bookRecord : user.getCurrentlyReservedBooks()) {
             if (user.getCurrentlyBorrowedBooks().size() >= 5) {
@@ -338,7 +341,7 @@ public class StartUpService {
                       bookRecord.getBookId(),
                       Date.from(
                           localDate
-                              .plusDays(10)
+                              .plusDays(11)
                               .atStartOfDay()
                               .atZone(ZoneId.systemDefault())
                               .toInstant())));
@@ -358,34 +361,71 @@ public class StartUpService {
           user.setCurrentlyReservedBooks(bookRecords);
         }
 
-        //
-        if (user.get() <5) {
+        usersToday.put(user.getId(), user);
+      } // END OF CHECK USER FOR MUST RETURN BOOKS
 
+      if (usersToday.size() < 30) {
+        while (usersToday.size() < 30) {
+          Random random = new Random();
+          User randomUser = userList.get(random.nextInt(userList.size()));
+          if (usersToday.containsKey(randomUser.getId()) == false) {
+            if (randomUser.getCurrentlyBorrowedBooks().size() < 5
+                || randomUser.getCurrentlyReservedBooks().size() < 5) {
+              if (randomUser.getCurrentlyBorrowedBooks().size() < 5) {
+                FunctionScoreQueryBuilder functionScoreQueryBuilder =
+                    new FunctionScoreQueryBuilder(
+                        QueryBuilders.boolQuery()
+                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)));
+                functionScoreQueryBuilder.boostMode(CombineFunction.REPLACE);
+                SearchSourceBuilder searchSourceBuilder =
+                    new SearchSourceBuilder().query(functionScoreQueryBuilder).size(1);
+                SearchResponse bookResponse =
+                    elasticsearchClient.search(
+                        new SearchRequest("book").source(searchSourceBuilder),
+                        RequestOptions.DEFAULT);
+                BookRecord bookRecord =
+                    new BookRecord(
+                        bookResponse.getHits().getHits()[0].getId(),
+                        Date.from(
+                            localDate
+                                .plusDays(11)
+                                .atStartOfDay()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()));
+                bookAndActivityBulkRequest.add(
+                    this.createActivityRequest(
+                        Action.CHECKEDOUT.toString(),
+                        dateToday,
+                        randomUser.getId(),
+                        bookRecord.getBookId(),
+                        library.getId()));
+                bookAndActivityBulkRequest.add(
+                    this.updateBookRequest(
+                        bookRecord.getBookId(),
+                        Date.from(
+                            localDate
+                                .plusDays(11)
+                                .atStartOfDay()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        false));
+                List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
+                currentlyBorrowedBooks.add(bookRecord);
+                randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
+                usersToday.put(randomUser.getId(), randomUser);
+              } else if (randomUser.getCurrentlyReservedBooks().size() < 5) {
+                //TODO: Reserve a book
+                // reserve a book and add user to usersToday
+              }
+            }
+          }
         }
+      }
 
-
-        // reserve
-        // if they don't have anything reserved then just borrow books and
-        // reserve books -> can you reserve a book that is already available?
-
-        // if reserve is
-
-        //          if (user.getCurrentlyBorrowedBooks() < 5) {
-        // Search searchForBooks that are available
-        //          }
-
-        // add this user to request update
-
-      } // END OF USER LOOP
-
-      //      ittterate through each user and see if any of there reserved book is available to
-      //      borrow add them to the array
-      //      if they have full inventory then they can either return 1 of there current used
-      //      books or keep resrving
-      //
-      //      if size of array is less than 30 then add more users to borrow books
+      // for each user depending on room then do work
 
       // UPSERT FOR EACH USER in userList
+
       localDate = localDate.plusDays(1);
       dateToday = dateTomorrow;
 
