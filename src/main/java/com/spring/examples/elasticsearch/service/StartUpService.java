@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -368,7 +369,7 @@ public class StartUpService {
         while (usersToday.size() < 30) {
           Random random = new Random();
           User randomUser = userList.get(random.nextInt(userList.size()));
-          if (usersToday.containsKey(randomUser.getId()) == false) {
+          if (!usersToday.containsKey(randomUser.getId())) {
             if (randomUser.getCurrentlyBorrowedBooks().size() < 5
                 || randomUser.getCurrentlyReservedBooks().size() < 5) {
               if (randomUser.getCurrentlyBorrowedBooks().size() < 5) {
@@ -414,17 +415,42 @@ public class StartUpService {
                 randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
                 usersToday.put(randomUser.getId(), randomUser);
               } else if (randomUser.getCurrentlyReservedBooks().size() < 5) {
-                //TODO: Reserve a book
-                // reserve a book and add user to usersToday
+                FunctionScoreQueryBuilder functionScoreQueryBuilder =
+                    new FunctionScoreQueryBuilder(
+                        QueryBuilders.boolQuery()
+                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", false)));
+                functionScoreQueryBuilder.boostMode(CombineFunction.REPLACE);
+                SearchSourceBuilder searchSourceBuilder =
+                    new SearchSourceBuilder().query(functionScoreQueryBuilder).size(1);
+                SearchResponse bookResponse =
+                    elasticsearchClient.search(
+                        new SearchRequest("book").source(searchSourceBuilder),
+                        RequestOptions.DEFAULT);
+                BookRecord bookRecord =
+                    new BookRecord(bookResponse.getHits().getHits()[0].getId(), null);
+                bookAndActivityBulkRequest.add(
+                    this.createActivityRequest(
+                        Action.RESERVED.toString(),
+                        dateToday,
+                        randomUser.getId(),
+                        bookRecord.getBookId(),
+                        library.getId()));
+                List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
+                currentlyBorrowedBooks.add(bookRecord);
+                randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
+                usersToday.put(randomUser.getId(), randomUser);
               }
             }
           }
         }
       }
 
-      // for each user depending on room then do work
-
+      BulkRequest userTodaysBulkRequest = new BulkRequest();
       // UPSERT FOR EACH USER in userList
+      for (Entry<String, User> entry: usersToday.entrySet()) {
+        User user
+        elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
+      }
 
       localDate = localDate.plusDays(1);
       dateToday = dateTomorrow;
