@@ -1,5 +1,7 @@
 package com.spring.examples.elasticsearch.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.examples.elasticsearch.domain.Action;
 import com.spring.examples.elasticsearch.domain.BookRecord;
 import com.spring.examples.elasticsearch.domain.Library;
@@ -21,6 +23,9 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -50,22 +55,137 @@ public class StartUpService {
   private final ResourceLoader resourceLoader;
   private final RestHighLevelClient elasticsearchClient;
 
-  /*This method is not optimised and Big O notation is O(n^c)*/
   @PostConstruct
-  private void initializeData() throws IOException, ParseException {
+  public void createUserIndex() throws IOException {
+    DeleteIndexRequest request = new DeleteIndexRequest("user");
+    elasticsearchClient.indices().delete(request, RequestOptions.DEFAULT);
+    IndexRequest indexRequest = new IndexRequest("user");
+
+    User user = new User();
+    user.setFirstName("John");
+    user.setLastName("Abiertas");
+    List<BookRecord> bookRecords = new ArrayList<>();
+    bookRecords.add(new BookRecord("SID", new Date()));
+    bookRecords.add(new BookRecord("SID1", new Date()));
+    bookRecords.add(new BookRecord("SID2", new Date()));
+    bookRecords.add(new BookRecord("SID3", new Date()));
+    bookRecords.add(new BookRecord("SID4", new Date()));
+    bookRecords.add(new BookRecord("SID5", new Date()));
+    user.setCurrentlyBorrowedBooks(bookRecords);
+    user.setCurrentlyReservedBooks(bookRecords);
+
+    indexRequest.source(new ObjectMapper().writeValueAsString(user), XContentType.JSON);
+
+    elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
+
+    RefreshResponse refreshResponse =
+        elasticsearchClient.indices().refresh(new RefreshRequest(), RequestOptions.DEFAULT);
+
+    SearchRequest searchRequest = new SearchRequest("user");
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+    searchRequest.source(searchSourceBuilder);
+    SearchResponse searchResponse =
+        elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
+
+    List<BookRecord> bookRecordList = new ArrayList<>();
+    for (SearchHit searchHit : searchResponse.getHits().getHits()) {
+
+      List<BookRecord> currentlyBorrowedBooks = userSearchHit.getCurrentlyBorrowedBooks();
+      for (int i = 0, currentlyBorrowedBooksSize = currentlyBorrowedBooks.size();
+          i < currentlyBorrowedBooksSize;
+          i++) {
+        System.out.println(currentlyBorrowedBooks.get(i).getBookId());
+        BookRecord bookRecord = currentlyBorrowedBooks.get(i);
+        bookRecordList.add(bookRecord);
+      }
+    }
+
+    System.out.println(bookRecordList);
+    //      elasticsearchClient
+    //          .indices()
+    //          .create(
+    //              new CreateIndexRequest("user").mapping(this.c, XContentType.JSON),
+    //              RequestOptions.DEFAULT);
+
+    // TODO: need to add empty array of books
+
+  }
+  /*This method is not optimised and Big O notation is O(n^c)*/
+  public void initializeData() throws IOException, ParseException {
     BulkRequest createUserBulkRequest = new BulkRequest();
 
     // Delete existing user index and creates an empty user index
     if (!elasticsearchClient
         .indices()
         .exists(new GetIndexRequest("user"), RequestOptions.DEFAULT)) {
-      elasticsearchClient.indices().create(new CreateIndexRequest("user"), RequestOptions.DEFAULT);
+      String properties =
+          "{\n"
+              + "\"properties\" : {\n"
+              + "        \"currentlyBorrowedBooks\" : {\n"
+              + "          \"properties\" : {\n"
+              + "            \"bookId\" : {\n"
+              + "              \"type\" : \"text\",\n"
+              + "              \"fields\" : {\n"
+              + "                \"keyword\" : {\n"
+              + "                  \"type\" : \"keyword\",\n"
+              + "                  \"ignore_above\" : 256\n"
+              + "                }\n"
+              + "              }\n"
+              + "            },\n"
+              + "            \"returnDate\" : {\n"
+              + "              \"type\" : \"date\"\n"
+              + "            }\n"
+              + "          }\n"
+              + "        },\n"
+              + "        \"currentlyReservedBooks\" : {\n"
+              + "          \"properties\" : {\n"
+              + "            \"bookId\" : {\n"
+              + "              \"type\" : \"text\",\n"
+              + "              \"fields\" : {\n"
+              + "                \"keyword\" : {\n"
+              + "                  \"type\" : \"keyword\",\n"
+              + "                  \"ignore_above\" : 256\n"
+              + "                }\n"
+              + "              }\n"
+              + "            },\n"
+              + "            \"returnDate\" : {\n"
+              + "              \"type\" : \"date\"\n"
+              + "            }\n"
+              + "          }\n"
+              + "        },\n"
+              + "        \"firstName\" : {\n"
+              + "          \"type\" : \"text\",\n"
+              + "          \"fields\" : {\n"
+              + "            \"keyword\" : {\n"
+              + "              \"type\" : \"keyword\",\n"
+              + "              \"ignore_above\" : 256\n"
+              + "            }\n"
+              + "          }\n"
+              + "        },\n"
+              + "        \"lastName\" : {\n"
+              + "          \"type\" : \"text\",\n"
+              + "          \"fields\" : {\n"
+              + "            \"keyword\" : {\n"
+              + "              \"type\" : \"keyword\",\n"
+              + "              \"ignore_above\" : 256\n"
+              + "            }\n"
+              + "          }\n"
+              + "        }\n"
+              + "      }"
+              + "}";
+
+      elasticsearchClient
+          .indices()
+          .create(
+              new CreateIndexRequest("user").mapping(properties, XContentType.JSON),
+              RequestOptions.DEFAULT);
     } else {
       elasticsearchClient.deleteByQuery(
           new DeleteByQueryRequest("user").setQuery(QueryBuilders.matchAllQuery()),
           RequestOptions.DEFAULT);
     }
-//TODO: need to add empty array of books
+    // TODO: need to add empty array of books
     createUserBulkRequest.add(createUserRequest("John", "Doe"));
     createUserBulkRequest.add(createUserRequest("Jane", "Doe"));
     createUserBulkRequest.add(createUserRequest("Mark", "Doe"));
@@ -206,7 +326,7 @@ public class StartUpService {
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
-        int numBooks = new Random().nextInt(5) + 1;
+        int numBooks = new Random().nextInt(10) + 1;
         while (numBooks >= 1) {
           bookBulkRequest.add(
               createBookRequest(
@@ -221,11 +341,13 @@ public class StartUpService {
 
     Date dateToday = date;
     for (int i = 365; i >= 0; i--) {
+      System.out.println(dateToday.toString());
+
       Date dateTomorrow =
           Date.from(
               localDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+
       BulkRequest bookAndActivityBulkRequest = new BulkRequest();
-      BulkRequest userBulkRequest = new BulkRequest();
 
       HashMap<String, User> usersToday = new HashMap<>();
       SearchRequest userSearchRequest = new SearchRequest("user");
@@ -245,13 +367,19 @@ public class StartUpService {
         user.setId(userHit.getId());
         user.setFirstName((String) userHitSourceAsMap.get("firstName"));
         user.setLastName((String) userHitSourceAsMap.get("lastName"));
-        userList.add(
-            new User(
-                userHit.getId(),
-                (String) userHitSourceAsMap.get("firstName"),
-                (String) userHitSourceAsMap.get("lastName"),
-                (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks"),
-                (List<BookRecord>) userHitSourceAsMap.get("idsOfCurrentlyReservedBooks")));
+        List<BookRecord> currentlyBorrowedBooks =
+            userHitSourceAsMap.get("currentlyBorrowedBooks") == null
+                ? new ArrayList<BookRecord>()
+                : new ArrayList<BookRecord>(
+                    (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks"));
+        user.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
+        List<BookRecord> currentlyReservedBooks =
+            userHitSourceAsMap.get("currentlyReservedBooks") == null
+                ? new ArrayList<>()
+                : new ArrayList<BookRecord>(
+                    (List<BookRecord>) userHitSourceAsMap.get("currentlyReservedBooks"));
+        user.setCurrentlyReservedBooks(currentlyReservedBooks);
+        userList.add(user);
       }
 
       // Randomize userList. I know Collection.shuffle would be a better implementation.
@@ -268,7 +396,15 @@ public class StartUpService {
         List<String> idsOfReturnedBooks = new ArrayList<>();
 
         // if there are any expired books then return it.
-        for (BookRecord bookRecord : user.getCurrentlyBorrowedBooks()) {
+        List<BookRecord> currentlyBorrowedBooks =
+            new ArrayList<BookRecord>(user.getCurrentlyBorrowedBooks());
+        for (int j = 0, currentlyBorrowedBooksSize = currentlyBorrowedBooks.size();
+            j < currentlyBorrowedBooksSize;
+            j++) {
+          BookRecord bookRecord =
+              new BookRecord(
+                  (currentlyBorrowedBooks.get(j)).getBookId(),
+                  (currentlyBorrowedBooks.get(j)).getReturnDate());
           if (bookRecord.getReturnDate().equals(dateToday)) {
             bookAndActivityBulkRequest.add(
                 this.createActivityRequest(
@@ -384,36 +520,38 @@ public class StartUpService {
                     elasticsearchClient.search(
                         new SearchRequest("book").source(searchSourceBuilder),
                         RequestOptions.DEFAULT);
-                BookRecord bookRecord =
-                    new BookRecord(
-                        bookResponse.getHits().getHits()[0].getId(),
-                        Date.from(
-                            localDate
-                                .plusDays(11)
-                                .atStartOfDay()
-                                .atZone(ZoneId.systemDefault())
-                                .toInstant()));
-                bookAndActivityBulkRequest.add(
-                    this.createActivityRequest(
-                        Action.CHECKEDOUT.toString(),
-                        dateToday,
-                        randomUser.getId(),
-                        bookRecord.getBookId(),
-                        library.getId()));
-                bookAndActivityBulkRequest.add(
-                    this.updateBookRequest(
-                        bookRecord.getBookId(),
-                        Date.from(
-                            localDate
-                                .plusDays(11)
-                                .atStartOfDay()
-                                .atZone(ZoneId.systemDefault())
-                                .toInstant()),
-                        false));
-                List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
-                currentlyBorrowedBooks.add(bookRecord);
-                randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
-                usersToday.put(randomUser.getId(), randomUser);
+                if (bookResponse.getHits().getHits().length > 0) {
+                  BookRecord bookRecord =
+                      new BookRecord(
+                          bookResponse.getHits().getHits()[0].getId(),
+                          Date.from(
+                              localDate
+                                  .plusDays(11)
+                                  .atStartOfDay()
+                                  .atZone(ZoneId.systemDefault())
+                                  .toInstant()));
+                  bookAndActivityBulkRequest.add(
+                      this.createActivityRequest(
+                          Action.CHECKEDOUT.toString(),
+                          dateToday,
+                          randomUser.getId(),
+                          bookRecord.getBookId(),
+                          library.getId()));
+                  bookAndActivityBulkRequest.add(
+                      this.updateBookRequest(
+                          bookRecord.getBookId(),
+                          Date.from(
+                              localDate
+                                  .plusDays(11)
+                                  .atStartOfDay()
+                                  .atZone(ZoneId.systemDefault())
+                                  .toInstant()),
+                          false));
+                  List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
+                  currentlyBorrowedBooks.add(bookRecord);
+                  randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
+                  usersToday.put(randomUser.getId(), randomUser);
+                }
               } else if (randomUser.getCurrentlyReservedBooks().size() < 5) {
                 FunctionScoreQueryBuilder functionScoreQueryBuilder =
                     new FunctionScoreQueryBuilder(
@@ -446,16 +584,25 @@ public class StartUpService {
       }
 
       BulkRequest userTodaysBulkRequest = new BulkRequest();
-      // UPSERT FOR EACH USER in userList
       for (Entry<String, User> entry : usersToday.entrySet()) {
         User user = entry.getValue();
+        List<BookRecord> currentlyBorrowedBooks =
+            user.getCurrentlyBorrowedBooks() == null
+                ? null
+                : new ArrayList<BookRecord>(user.getCurrentlyBorrowedBooks());
+        List<BookRecord> currentlyReservedBooks =
+            user.getCurrentlyReservedBooks() == null
+                ? null
+                : new ArrayList<BookRecord>(user.getCurrentlyReservedBooks());
         Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("firstName", user.getFirstName());
-        jsonMap.put("lastName", user.getLastName());
-        jsonMap.put("currentlyBorrowedBooks", user.getCurrentlyBorrowedBooks());
-        jsonMap.put("currentlyReservedBooks", user.getCurrentlyReservedBooks());
 
-        userTodaysBulkRequest.add(new UpdateRequest("user", user.getId()).doc(jsonMap));
+        jsonMap.put("currentlyBorrowedBooks", currentlyBorrowedBooks);
+        jsonMap.put("currentlyReservedBooks", currentlyReservedBooks);
+
+        userTodaysBulkRequest.add(
+            new UpdateRequest("user", user.getId())
+                .doc(new ObjectMapper().writeValueAsString(user), XContentType.JSON));
       }
 
       elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
@@ -469,18 +616,16 @@ public class StartUpService {
     System.out.println("Data Creation Complete!");
   }
 
-  private IndexRequest createUserRequest(String firstName, String lastName) {
+  private IndexRequest createUserRequest(String firstName, String lastName)
+      throws JsonProcessingException {
+    User user = new User();
+    user.setFirstName(firstName);
+    user.setLastName(lastName);
+    user.setCurrentlyBorrowedBooks(new ArrayList<BookRecord>());
+    user.setCurrentlyReservedBooks(new ArrayList<BookRecord>());
+
     return new IndexRequest("user")
-        .source(
-            XContentType.JSON,
-            "firstName",
-            firstName,
-            "lastName",
-            lastName,
-            "currentlyBorrowedBooks",
-            new ArrayList<BookRecord>(),
-            "currentlyReservedBooks",
-            new ArrayList<BookRecord>());
+        .source(new ObjectMapper().writeValueAsString(user), XContentType.JSON);
   }
 
   private IndexRequest createBookRequest(
@@ -534,5 +679,18 @@ public class StartUpService {
     jsonMap.put("isAvailableToBorrow", isAvailableToBorrow);
 
     return request.doc(jsonMap);
+  }
+
+  private List<BookRecord> toBookRecord(List<HashMap<String, Object>> hashMapList) {
+    List<BookRecord> bookRecords = new ArrayList<BookRecord>();
+    if (hashMapList != null && !hashMapList.isEmpty()) {
+      for (HashMap<String, Object> hashMap : hashMapList) {
+        BookRecord bookRecord = new BookRecord();
+        bookRecord.setBookId((String) hashMap.get("bookId"));
+        bookRecord.setReturnDate(new Date((Long) hashMap.get("returnDate")));
+        bookRecords.add(bookRecord);
+      }
+    }
+    return bookRecords;
   }
 }
