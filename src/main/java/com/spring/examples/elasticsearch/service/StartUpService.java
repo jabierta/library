@@ -23,7 +23,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -341,7 +340,13 @@ public class StartUpService {
           BookRecord bookRecord =
               new BookRecord(
                   currentlyBorrowedBook.getBookId(), currentlyBorrowedBook.getReturnDate());
-          if (bookRecord.getReturnDate().equals(dateToday)) {
+          try {
+            boolean bookDate = bookRecord.getReturnDate().equals(dateToday.getTime());
+          } catch (Exception e) {
+            //TODO Why is this null!
+            System.out.println("WTF");
+          }
+          if (bookRecord.getReturnDate().equals(dateToday.getTime())) {
             bookAndActivityBulkRequest.add(
                 this.createActivityRequest(
                     Action.CHECKEDIN.toString(),
@@ -623,7 +628,7 @@ public class StartUpService {
       for (HashMap<String, Object> hashMap : hashMapList) {
         BookRecord bookRecord = new BookRecord();
         bookRecord.setBookId((String) hashMap.get("bookId"));
-        bookRecord.setReturnDate(new Date((Long) hashMap.get("returnDate")));
+        bookRecord.setReturnDate((Long) hashMap.get("returnDate"));
         bookRecords.add(bookRecord);
       }
     }
