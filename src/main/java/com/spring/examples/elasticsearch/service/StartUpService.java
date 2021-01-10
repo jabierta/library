@@ -507,7 +507,6 @@ public class StartUpService {
             libraryId);
   }
 
-  // TODO: Create activity update!
   private IndexRequest createActivityRequest(
       String activityType, Date activityDate, String userId, String bookId, String libraryId) {
 
