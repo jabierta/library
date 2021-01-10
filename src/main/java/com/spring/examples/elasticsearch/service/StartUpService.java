@@ -447,8 +447,16 @@ public class StartUpService {
 
       BulkRequest userTodaysBulkRequest = new BulkRequest();
       // UPSERT FOR EACH USER in userList
-      for (Entry<String, User> entry: usersToday.entrySet()) {
-        User user
+      for (Entry<String, User> entry : usersToday.entrySet()) {
+        User user = entry.getValue();
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("firstName", user.getFirstName());
+        jsonMap.put("lastName", user.getLastName());
+        jsonMap.put("currentlyBorrowedBooks", user.getCurrentlyBorrowedBooks());
+        jsonMap.put("currentlyReservedBooks", user.getCurrentlyReservedBooks());
+        elasticsearchClient.update(
+            new UpdateRequest("user", user.getId()).doc(jsonMap), RequestOptions.DEFAULT);
+
         elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
       }
 

@@ -83,13 +83,8 @@ public class UserService {
                             hit.getId(),
                             (String) hit.getSourceAsMap().get("firstName"),
                             (String) hit.getSourceAsMap().get("lastName"),
-                            null
-                            //                            (List<String>)
-                            // hit.getSourceAsMap().get("idsOfCurrentlyBorrowedBooks")
-                            ,
-                            //                            (List<String>)
-                            // hit.getSourceAsMap().get("idsOfCurrentlyReservedBooks")
-                            null))
+                            (List<BookRecord>) hit.getSourceAsMap().get("currentlyBorrowedBooks"),
+                            (List<BookRecord>) hit.getSourceAsMap().get("currentlyReservedBooks")))
                 .collect(Collectors.toList()));
 
         scrollId = searchResponse.getScrollId();
@@ -132,12 +127,8 @@ public class UserService {
                       hit.getId(),
                       (String) hit.getSourceAsMap().get("firstName"),
                       (String) hit.getSourceAsMap().get("lastName"),
-                      null
-                      //      (List<String>) hit.getSourceAsMap().get("idsOfCurrentlyBorrowedBooks")
-                      ,
-                      null
-                      //      (List<String>) hit.getSourceAsMap().get("idsOfCurrentlyReservedBooks")
-                      ))
+                      (List<BookRecord>) hit.getSourceAsMap().get("currentlyBorrowedBooks"),
+                      (List<BookRecord>) hit.getSourceAsMap().get("currentlyReservedBooks")))
           .collect(Collectors.toList());
 
     } catch (IOException e) {
@@ -161,12 +152,8 @@ public class UserService {
           result.getId(),
           (String) sourceAsMap.get("firstName"),
           (String) sourceAsMap.get("lastName"),
-          null
-          //      (List<String>) sourceAsMap.get("idsOfCurrentlyBorrowedBooks")
-          ,
-          null
-          //      (List<String>) sourceAsMap.get("idsOfCurrentlyReservedBooks")
-          );
+          (List<BookRecord>) sourceAsMap.get("currentlyBorrowedBooks"),
+          (List<BookRecord>) sourceAsMap.get("currentlyReservedBooks"));
 
     } catch (IOException e) {
       e.printStackTrace();
