@@ -65,7 +65,7 @@ public class StartUpService {
           new DeleteByQueryRequest("user").setQuery(QueryBuilders.matchAllQuery()),
           RequestOptions.DEFAULT);
     }
-
+//TODO: need to add empty array of books
     createUserBulkRequest.add(createUserRequest("John", "Doe"));
     createUserBulkRequest.add(createUserRequest("Jane", "Doe"));
     createUserBulkRequest.add(createUserRequest("Mark", "Doe"));
@@ -255,11 +255,11 @@ public class StartUpService {
       }
 
       // Randomize userList. I know Collection.shuffle would be a better implementation.
-      for (int currentUserIndex = 0; currentUserIndex <= userList.size(); currentUserIndex++) {
-        int swapLocation = new Random().nextInt(userList.size()) + 1;
-        User currentUser = userList.get(i);
+      for (int currentUserIndex = 0; currentUserIndex < userList.size(); currentUserIndex++) {
+        int swapLocation = new Random().nextInt(userList.size());
+        User currentUser = userList.get(currentUserIndex);
         User swappedUser = userList.get(swapLocation);
-        userList.set(i, swappedUser);
+        userList.set(currentUserIndex, swappedUser);
         userList.set(swapLocation, currentUser);
       }
 
@@ -454,11 +454,11 @@ public class StartUpService {
         jsonMap.put("lastName", user.getLastName());
         jsonMap.put("currentlyBorrowedBooks", user.getCurrentlyBorrowedBooks());
         jsonMap.put("currentlyReservedBooks", user.getCurrentlyReservedBooks());
-        elasticsearchClient.update(
-            new UpdateRequest("user", user.getId()).doc(jsonMap), RequestOptions.DEFAULT);
 
-        elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
+        userTodaysBulkRequest.add(new UpdateRequest("user", user.getId()).doc(jsonMap));
       }
+
+      elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
 
       localDate = localDate.plusDays(1);
       dateToday = dateTomorrow;
