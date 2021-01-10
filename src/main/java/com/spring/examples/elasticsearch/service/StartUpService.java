@@ -465,6 +465,8 @@ public class StartUpService {
 
       elasticsearchClient.bulk(bookAndActivityBulkRequest, RequestOptions.DEFAULT);
     }
+
+    System.out.println("Data Creation Complete!");
   }
 
   private IndexRequest createUserRequest(String firstName, String lastName) {
