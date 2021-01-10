@@ -25,7 +25,6 @@ import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -56,61 +55,6 @@ public class StartUpService {
   private final RestHighLevelClient elasticsearchClient;
 
   @PostConstruct
-  public void createUserIndex() throws IOException {
-    DeleteIndexRequest request = new DeleteIndexRequest("user");
-    elasticsearchClient.indices().delete(request, RequestOptions.DEFAULT);
-    IndexRequest indexRequest = new IndexRequest("user");
-
-    User user = new User();
-    user.setFirstName("John");
-    user.setLastName("Abiertas");
-    List<BookRecord> bookRecords = new ArrayList<>();
-    bookRecords.add(new BookRecord("SID", new Date()));
-    bookRecords.add(new BookRecord("SID1", new Date()));
-    bookRecords.add(new BookRecord("SID2", new Date()));
-    bookRecords.add(new BookRecord("SID3", new Date()));
-    bookRecords.add(new BookRecord("SID4", new Date()));
-    bookRecords.add(new BookRecord("SID5", new Date()));
-    user.setCurrentlyBorrowedBooks(bookRecords);
-    user.setCurrentlyReservedBooks(bookRecords);
-
-    indexRequest.source(new ObjectMapper().writeValueAsString(user), XContentType.JSON);
-
-    elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
-
-    RefreshResponse refreshResponse =
-        elasticsearchClient.indices().refresh(new RefreshRequest(), RequestOptions.DEFAULT);
-
-    SearchRequest searchRequest = new SearchRequest("user");
-    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-    searchRequest.source(searchSourceBuilder);
-    SearchResponse searchResponse =
-        elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
-
-    List<BookRecord> bookRecordList = new ArrayList<>();
-    for (SearchHit searchHit : searchResponse.getHits().getHits()) {
-
-      List<BookRecord> currentlyBorrowedBooks = userSearchHit.getCurrentlyBorrowedBooks();
-      for (int i = 0, currentlyBorrowedBooksSize = currentlyBorrowedBooks.size();
-          i < currentlyBorrowedBooksSize;
-          i++) {
-        System.out.println(currentlyBorrowedBooks.get(i).getBookId());
-        BookRecord bookRecord = currentlyBorrowedBooks.get(i);
-        bookRecordList.add(bookRecord);
-      }
-    }
-
-    System.out.println(bookRecordList);
-    //      elasticsearchClient
-    //          .indices()
-    //          .create(
-    //              new CreateIndexRequest("user").mapping(this.c, XContentType.JSON),
-    //              RequestOptions.DEFAULT);
-
-    // TODO: need to add empty array of books
-
-  }
   /*This method is not optimised and Big O notation is O(n^c)*/
   public void initializeData() throws IOException, ParseException {
     BulkRequest createUserBulkRequest = new BulkRequest();
@@ -341,6 +285,7 @@ public class StartUpService {
 
     Date dateToday = date;
     for (int i = 365; i >= 0; i--) {
+      elasticsearchClient.indices().refresh(new RefreshRequest(), RequestOptions.DEFAULT);
       System.out.println(dateToday.toString());
 
       Date dateTomorrow =
@@ -368,16 +313,12 @@ public class StartUpService {
         user.setFirstName((String) userHitSourceAsMap.get("firstName"));
         user.setLastName((String) userHitSourceAsMap.get("lastName"));
         List<BookRecord> currentlyBorrowedBooks =
-            userHitSourceAsMap.get("currentlyBorrowedBooks") == null
-                ? new ArrayList<BookRecord>()
-                : new ArrayList<BookRecord>(
-                    (List<BookRecord>) userHitSourceAsMap.get("currentlyBorrowedBooks"));
+            this.toBookRecord(
+                (List<HashMap<String, Object>>) userHitSourceAsMap.get("currentlyBorrowedBooks"));
         user.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
         List<BookRecord> currentlyReservedBooks =
-            userHitSourceAsMap.get("currentlyReservedBooks") == null
-                ? new ArrayList<>()
-                : new ArrayList<BookRecord>(
-                    (List<BookRecord>) userHitSourceAsMap.get("currentlyReservedBooks"));
+            this.toBookRecord(
+                (List<HashMap<String, Object>>) userHitSourceAsMap.get("currentlyReservedBooks"));
         user.setCurrentlyReservedBooks(currentlyReservedBooks);
         userList.add(user);
       }
@@ -394,17 +335,12 @@ public class StartUpService {
       // Loop through each user. And check if anyone has to return a book
       for (User user : userList) {
         List<String> idsOfReturnedBooks = new ArrayList<>();
-
-        // if there are any expired books then return it.
         List<BookRecord> currentlyBorrowedBooks =
             new ArrayList<BookRecord>(user.getCurrentlyBorrowedBooks());
-        for (int j = 0, currentlyBorrowedBooksSize = currentlyBorrowedBooks.size();
-            j < currentlyBorrowedBooksSize;
-            j++) {
+        for (BookRecord currentlyBorrowedBook : currentlyBorrowedBooks) {
           BookRecord bookRecord =
               new BookRecord(
-                  (currentlyBorrowedBooks.get(j)).getBookId(),
-                  (currentlyBorrowedBooks.get(j)).getReturnDate());
+                  currentlyBorrowedBook.getBookId(), currentlyBorrowedBook.getReturnDate());
           if (bookRecord.getReturnDate().equals(dateToday)) {
             bookAndActivityBulkRequest.add(
                 this.createActivityRequest(
@@ -481,7 +417,7 @@ public class StartUpService {
                               .plusDays(11)
                               .atStartOfDay()
                               .atZone(ZoneId.systemDefault())
-                              .toInstant())));
+                              .toInstant()).getTime()));
 
               user.setCurrentlyBorrowedBooks(bookRecords);
 
@@ -529,7 +465,7 @@ public class StartUpService {
                                   .plusDays(11)
                                   .atStartOfDay()
                                   .atZone(ZoneId.systemDefault())
-                                  .toInstant()));
+                                  .toInstant()).getTime());
                   bookAndActivityBulkRequest.add(
                       this.createActivityRequest(
                           Action.CHECKEDOUT.toString(),
