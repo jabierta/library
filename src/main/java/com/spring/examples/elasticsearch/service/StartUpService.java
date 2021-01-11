@@ -49,6 +49,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 // Create conditional property to run or not
 // This is a Frankenstein
+// TODO: Update and create a better approach
 public class StartUpService {
   private final ResourceLoader resourceLoader;
   private final RestHighLevelClient elasticsearchClient;
