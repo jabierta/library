@@ -379,7 +379,7 @@ public class StartUpService {
 
         // If there are room to borrow more books then borrow it.
         List<String> removeThisFromReservedBooks = new ArrayList<>();
-        if (user.getCurrentlyBorrowedBooks().size() < 5) {
+        if (user.getCurrentlyBorrowedBooks().size() < 10) {
           for (BookRecord bookRecord : user.getCurrentlyReservedBooks()) {
             if (user.getCurrentlyBorrowedBooks().size() >= 5) {
               break;
@@ -460,9 +460,9 @@ public class StartUpService {
           int randomIndex = random.nextInt(userList.size());
           randomUser = userList.get(randomIndex);
           if (!usersToday.containsKey(randomUser.getId())) {
-            if (randomUser.getCurrentlyBorrowedBooks().size() < 5
+            if (randomUser.getCurrentlyBorrowedBooks().size() < 10
                 || randomUser.getCurrentlyReservedBooks().size() < 5) {
-              boolean toBorrow = randomUser.getCurrentlyBorrowedBooks().size() < 5;
+              boolean toBorrow = randomUser.getCurrentlyBorrowedBooks().size() < 10;
               boolean toReserve = randomUser.getCurrentlyReservedBooks().size() < 5;
               if (toBorrow) {
                 SearchSourceBuilder searchSourceBuilder =
