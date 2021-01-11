@@ -58,7 +58,7 @@ public class StartUpService {
   public void initializeData() throws IOException, ParseException {
     BulkRequest createUserBulkRequest = new BulkRequest();
 
-    // Delete existing user index and creates an empty user index
+    // Delete data in existing user index and creates an empty user index
     if (!elasticsearchClient
         .indices()
         .exists(new GetIndexRequest("user"), RequestOptions.DEFAULT)) {
@@ -128,7 +128,7 @@ public class StartUpService {
           new DeleteByQueryRequest("user").setQuery(QueryBuilders.matchAllQuery()),
           RequestOptions.DEFAULT);
     }
-    // TODO: need to add empty array of books
+
     createUserBulkRequest.add(createUserRequest("John", "Doe"));
     createUserBulkRequest.add(createUserRequest("Jane", "Doe"));
     createUserBulkRequest.add(createUserRequest("Mark", "Doe"));
@@ -191,6 +191,19 @@ public class StartUpService {
     createUserBulkRequest.add(createUserRequest("Sherrill", "Melle"));
 
     elasticsearchClient.bulk(createUserBulkRequest, RequestOptions.DEFAULT);
+
+    // Delete data in existing activity index and creates an empty user index
+    if (!elasticsearchClient
+        .indices()
+        .exists(new GetIndexRequest("activity"), RequestOptions.DEFAULT)) {
+      elasticsearchClient
+          .indices()
+          .create(new CreateIndexRequest("activity"), RequestOptions.DEFAULT);
+    } else {
+      elasticsearchClient.deleteByQuery(
+          new DeleteByQueryRequest("activity").setQuery(QueryBuilders.matchAllQuery()),
+          RequestOptions.DEFAULT);
+    }
 
     // Delete existing library index and creates an empty library index
     if (!elasticsearchClient
@@ -269,7 +282,7 @@ public class StartUpService {
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
-        int numBooks = new Random().nextInt(10) + 1;
+        int numBooks = new Random().nextInt(25) + 1;
         while (numBooks >= 1) {
           bookBulkRequest.add(
               createBookRequest(
@@ -285,6 +298,7 @@ public class StartUpService {
     Date dateToday = date;
     for (int i = 365; i >= 0; i--) {
       elasticsearchClient.indices().refresh(new RefreshRequest(), RequestOptions.DEFAULT);
+      System.out.println("Starting............");
       System.out.println(dateToday.toString());
 
       Date dateTomorrow =
@@ -331,6 +345,8 @@ public class StartUpService {
         userList.set(swapLocation, currentUser);
       }
 
+      System.out.println("Randomizing User List Complete");
+
       // Loop through each user. And check if anyone has to return a book
       for (User user : userList) {
         List<String> idsOfReturnedBooks = new ArrayList<>();
@@ -340,12 +356,6 @@ public class StartUpService {
           BookRecord bookRecord =
               new BookRecord(
                   currentlyBorrowedBook.getBookId(), currentlyBorrowedBook.getReturnDate());
-          try {
-            boolean bookDate = bookRecord.getReturnDate().equals(dateToday.getTime());
-          } catch (Exception e) {
-            //TODO Why is this null!
-            System.out.println("WTF");
-          }
           if (bookRecord.getReturnDate().equals(dateToday.getTime())) {
             bookAndActivityBulkRequest.add(
                 this.createActivityRequest(
@@ -418,11 +428,12 @@ public class StartUpService {
                   new BookRecord(
                       bookRecord.getBookId(),
                       Date.from(
-                          localDate
-                              .plusDays(11)
-                              .atStartOfDay()
-                              .atZone(ZoneId.systemDefault())
-                              .toInstant()).getTime()));
+                              localDate
+                                  .plusDays(11)
+                                  .atStartOfDay()
+                                  .atZone(ZoneId.systemDefault())
+                                  .toInstant())
+                          .getTime()));
 
               user.setCurrentlyBorrowedBooks(bookRecords);
 
@@ -442,14 +453,22 @@ public class StartUpService {
         usersToday.put(user.getId(), user);
       } // END OF CHECK USER FOR MUST RETURN BOOKS
 
+      System.out.println("Returning books complete!");
+
+      int sizeOfUserToday = usersToday.size();
+      int numBerOfTries = 0;
       if (usersToday.size() < 30) {
-        while (usersToday.size() < 30) {
+        while (sizeOfUserToday < 30 && numBerOfTries <= 59) {
           Random random = new Random();
-          User randomUser = userList.get(random.nextInt(userList.size()));
+          User randomUser = null;
+          int randomIndex = random.nextInt(userList.size());
+          randomUser = userList.get(randomIndex);
           if (!usersToday.containsKey(randomUser.getId())) {
             if (randomUser.getCurrentlyBorrowedBooks().size() < 5
                 || randomUser.getCurrentlyReservedBooks().size() < 5) {
-              if (randomUser.getCurrentlyBorrowedBooks().size() < 5) {
+              boolean toBorrow = randomUser.getCurrentlyBorrowedBooks().size() < 5;
+              boolean toReserve = randomUser.getCurrentlyReservedBooks().size() < 5;
+              if (toBorrow) {
                 FunctionScoreQueryBuilder functionScoreQueryBuilder =
                     new FunctionScoreQueryBuilder(
                         QueryBuilders.boolQuery()
@@ -470,7 +489,8 @@ public class StartUpService {
                                   .plusDays(11)
                                   .atStartOfDay()
                                   .atZone(ZoneId.systemDefault())
-                                  .toInstant()).getTime());
+                                  .toInstant())
+                              .getTime());
                   bookAndActivityBulkRequest.add(
                       this.createActivityRequest(
                           Action.CHECKEDOUT.toString(),
@@ -492,8 +512,9 @@ public class StartUpService {
                   currentlyBorrowedBooks.add(bookRecord);
                   randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
                   usersToday.put(randomUser.getId(), randomUser);
+                  sizeOfUserToday++;
                 }
-              } else if (randomUser.getCurrentlyReservedBooks().size() < 5) {
+              } else if (toReserve) {
                 FunctionScoreQueryBuilder functionScoreQueryBuilder =
                     new FunctionScoreQueryBuilder(
                         QueryBuilders.boolQuery()
@@ -505,24 +526,30 @@ public class StartUpService {
                     elasticsearchClient.search(
                         new SearchRequest("book").source(searchSourceBuilder),
                         RequestOptions.DEFAULT);
-                BookRecord bookRecord =
-                    new BookRecord(bookResponse.getHits().getHits()[0].getId(), null);
-                bookAndActivityBulkRequest.add(
-                    this.createActivityRequest(
-                        Action.RESERVED.toString(),
-                        dateToday,
-                        randomUser.getId(),
-                        bookRecord.getBookId(),
-                        library.getId()));
-                List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
-                currentlyBorrowedBooks.add(bookRecord);
-                randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
-                usersToday.put(randomUser.getId(), randomUser);
+                if (bookResponse.getHits().getHits().length > 0) {
+                  BookRecord bookRecord =
+                      new BookRecord(bookResponse.getHits().getHits()[0].getId(), null);
+                  bookAndActivityBulkRequest.add(
+                      this.createActivityRequest(
+                          Action.RESERVED.toString(),
+                          dateToday,
+                          randomUser.getId(),
+                          bookRecord.getBookId(),
+                          library.getId()));
+                  List<BookRecord> currentlyReservedBooks = randomUser.getCurrentlyReservedBooks();
+                  currentlyReservedBooks.add(bookRecord);
+                  randomUser.setCurrentlyReservedBooks(currentlyReservedBooks);
+                  usersToday.put(randomUser.getId(), randomUser);
+                  sizeOfUserToday++;
+                }
               }
             }
           }
+          numBerOfTries++;
         }
       }
+
+      System.out.println("Completed User setup!");
 
       BulkRequest userTodaysBulkRequest = new BulkRequest();
       for (Entry<String, User> entry : usersToday.entrySet()) {
@@ -546,12 +573,20 @@ public class StartUpService {
                 .doc(new ObjectMapper().writeValueAsString(user), XContentType.JSON));
       }
 
-      elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
+      System.out.println("Completed UserBulkRequest!");
+
+      if (!userTodaysBulkRequest.requests().isEmpty()) {
+        elasticsearchClient.bulk(userTodaysBulkRequest, RequestOptions.DEFAULT);
+      }
+
+      if (!bookAndActivityBulkRequest.requests().isEmpty()) {
+        elasticsearchClient.bulk(bookAndActivityBulkRequest, RequestOptions.DEFAULT);
+      }
 
       localDate = localDate.plusDays(1);
       dateToday = dateTomorrow;
 
-      elasticsearchClient.bulk(bookAndActivityBulkRequest, RequestOptions.DEFAULT);
+      System.out.println("Ending............\n");
     }
 
     System.out.println("Data Creation Complete!");
