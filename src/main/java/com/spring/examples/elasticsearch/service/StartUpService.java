@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,10 +35,8 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -282,7 +282,7 @@ public class StartUpService {
     while ((line = csvReader.readLine()) != null) {
       if (!line.equals("Title,Author,Year\n")) {
         String[] data = line.split(",");
-        int numBooks = new Random().nextInt(25) + 1;
+        int numBooks = new Random().nextInt(100) + 1;
         while (numBooks >= 1) {
           bookBulkRequest.add(
               createBookRequest(
@@ -353,20 +353,17 @@ public class StartUpService {
         List<BookRecord> currentlyBorrowedBooks =
             new ArrayList<BookRecord>(user.getCurrentlyBorrowedBooks());
         for (BookRecord currentlyBorrowedBook : currentlyBorrowedBooks) {
-          BookRecord bookRecord =
-              new BookRecord(
-                  currentlyBorrowedBook.getBookId(), currentlyBorrowedBook.getReturnDate());
-          if (bookRecord.getReturnDate().equals(dateToday.getTime())) {
+          if (new Date(currentlyBorrowedBook.getReturnDate()).equals(dateToday)) {
             bookAndActivityBulkRequest.add(
                 this.createActivityRequest(
                     Action.CHECKEDIN.toString(),
                     dateToday,
                     user.getId(),
-                    bookRecord.getBookId(),
+                    currentlyBorrowedBook.getBookId(),
                     library.getId()));
             bookAndActivityBulkRequest.add(
-                this.updateBookRequest(bookRecord.getBookId(), dateTomorrow, true));
-            idsOfReturnedBooks.add(bookRecord.getBookId());
+                this.updateBookRequest(currentlyBorrowedBook.getBookId(), dateTomorrow, true));
+            idsOfReturnedBooks.add(currentlyBorrowedBook.getBookId());
           }
         }
 
@@ -377,7 +374,7 @@ public class StartUpService {
                   .collect(Collectors.toList());
           user.setCurrentlyBorrowedBooks(bookRecords);
         } else {
-          break;
+          continue;
         }
 
         // If there are room to borrow more books then borrow it.
@@ -393,15 +390,14 @@ public class StartUpService {
                     .query(
                         QueryBuilders.boolQuery()
                             .must(QueryBuilders.matchQuery("_id", bookRecord.getBookId()))
-                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)))
-                    .size(1);
+                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)));
 
             SearchResponse bookResponse =
                 elasticsearchClient.search(
                     new SearchRequest("book").source(getBookByIdSearchSourceBuilder),
                     RequestOptions.DEFAULT);
 
-            if (bookResponse.getHits().getTotalHits().value == 1
+            if (bookResponse.getHits().getHits().length > 0
                 && user.getCurrentlyReservedBooks().size() < 5) {
 
               bookAndActivityBulkRequest.add(
@@ -421,7 +417,7 @@ public class StartUpService {
                               .atStartOfDay()
                               .atZone(ZoneId.systemDefault())
                               .toInstant()),
-                      true));
+                      false));
 
               List<BookRecord> bookRecords = user.getCurrentlyBorrowedBooks();
               bookRecords.add(
@@ -469,79 +465,76 @@ public class StartUpService {
               boolean toBorrow = randomUser.getCurrentlyBorrowedBooks().size() < 5;
               boolean toReserve = randomUser.getCurrentlyReservedBooks().size() < 5;
               if (toBorrow) {
-                FunctionScoreQueryBuilder functionScoreQueryBuilder =
-                    new FunctionScoreQueryBuilder(
-                        QueryBuilders.boolQuery()
-                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)));
-                functionScoreQueryBuilder.boostMode(CombineFunction.REPLACE);
                 SearchSourceBuilder searchSourceBuilder =
-                    new SearchSourceBuilder().query(functionScoreQueryBuilder).size(1);
+                    new SearchSourceBuilder()
+                        .query(
+                            QueryBuilders.boolQuery()
+                                .must(QueryBuilders.matchQuery("isAvailableToBorrow", true)))
+                        .size(10000);
                 SearchResponse bookResponse =
                     elasticsearchClient.search(
                         new SearchRequest("book").source(searchSourceBuilder),
                         RequestOptions.DEFAULT);
-                if (bookResponse.getHits().getHits().length > 0) {
-                  BookRecord bookRecord =
-                      new BookRecord(
-                          bookResponse.getHits().getHits()[0].getId(),
-                          Date.from(
-                              localDate
-                                  .plusDays(11)
-                                  .atStartOfDay()
-                                  .atZone(ZoneId.systemDefault())
-                                  .toInstant())
-                              .getTime());
-                  bookAndActivityBulkRequest.add(
-                      this.createActivityRequest(
-                          Action.CHECKEDOUT.toString(),
-                          dateToday,
-                          randomUser.getId(),
-                          bookRecord.getBookId(),
-                          library.getId()));
-                  bookAndActivityBulkRequest.add(
-                      this.updateBookRequest(
-                          bookRecord.getBookId(),
-                          Date.from(
-                              localDate
-                                  .plusDays(11)
-                                  .atStartOfDay()
-                                  .atZone(ZoneId.systemDefault())
-                                  .toInstant()),
-                          false));
-                  List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
-                  currentlyBorrowedBooks.add(bookRecord);
-                  randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
-                  usersToday.put(randomUser.getId(), randomUser);
-                  sizeOfUserToday++;
-                }
+                List<SearchHit> searchHits = Arrays.asList(bookResponse.getHits().getHits());
+                Collections.shuffle(searchHits);
+                BookRecord bookRecord =
+                    new BookRecord(
+                        searchHits.get(0).getId(),
+                        Date.from(
+                                localDate
+                                    .plusDays(11)
+                                    .atStartOfDay()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toInstant())
+                            .getTime());
+                bookAndActivityBulkRequest.add(
+                    this.createActivityRequest(
+                        Action.CHECKEDOUT.toString(),
+                        dateToday,
+                        randomUser.getId(),
+                        bookRecord.getBookId(),
+                        library.getId()));
+                bookAndActivityBulkRequest.add(
+                    this.updateBookRequest(
+                        bookRecord.getBookId(),
+                        Date.from(
+                            localDate
+                                .plusDays(11)
+                                .atStartOfDay()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        false));
+                List<BookRecord> currentlyBorrowedBooks = randomUser.getCurrentlyBorrowedBooks();
+                currentlyBorrowedBooks.add(bookRecord);
+                randomUser.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
+                usersToday.put(randomUser.getId(), randomUser);
+                sizeOfUserToday++;
               } else if (toReserve) {
-                FunctionScoreQueryBuilder functionScoreQueryBuilder =
-                    new FunctionScoreQueryBuilder(
-                        QueryBuilders.boolQuery()
-                            .must(QueryBuilders.matchQuery("isAvailableToBorrow", false)));
-                functionScoreQueryBuilder.boostMode(CombineFunction.REPLACE);
                 SearchSourceBuilder searchSourceBuilder =
-                    new SearchSourceBuilder().query(functionScoreQueryBuilder).size(1);
+                    new SearchSourceBuilder()
+                        .query(
+                            QueryBuilders.boolQuery()
+                                .must(QueryBuilders.matchQuery("isAvailableToBorrow", false)))
+                        .size(10000);
                 SearchResponse bookResponse =
                     elasticsearchClient.search(
                         new SearchRequest("book").source(searchSourceBuilder),
                         RequestOptions.DEFAULT);
-                if (bookResponse.getHits().getHits().length > 0) {
-                  BookRecord bookRecord =
-                      new BookRecord(bookResponse.getHits().getHits()[0].getId(), null);
-                  bookAndActivityBulkRequest.add(
-                      this.createActivityRequest(
-                          Action.RESERVED.toString(),
-                          dateToday,
-                          randomUser.getId(),
-                          bookRecord.getBookId(),
-                          library.getId()));
-                  List<BookRecord> currentlyReservedBooks = randomUser.getCurrentlyReservedBooks();
-                  currentlyReservedBooks.add(bookRecord);
-                  randomUser.setCurrentlyReservedBooks(currentlyReservedBooks);
-                  usersToday.put(randomUser.getId(), randomUser);
-                  sizeOfUserToday++;
-                }
+                List<SearchHit> searchHits = Arrays.asList(bookResponse.getHits().getHits());
+                Collections.shuffle(searchHits);
+                BookRecord bookRecord = new BookRecord(searchHits.get(0).getId(), null);
+                bookAndActivityBulkRequest.add(
+                    this.createActivityRequest(
+                        Action.RESERVED.toString(),
+                        dateToday,
+                        randomUser.getId(),
+                        bookRecord.getBookId(),
+                        library.getId()));
+                List<BookRecord> currentlyReservedBooks = randomUser.getCurrentlyReservedBooks();
+                currentlyReservedBooks.add(bookRecord);
+                randomUser.setCurrentlyReservedBooks(currentlyReservedBooks);
+                usersToday.put(randomUser.getId(), randomUser);
+                sizeOfUserToday++;
               }
             }
           }
