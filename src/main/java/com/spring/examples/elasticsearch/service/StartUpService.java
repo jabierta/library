@@ -298,7 +298,7 @@ public class StartUpService {
     Date dateToday = date;
     for (int i = 365; i >= 0; i--) {
       elasticsearchClient.indices().refresh(new RefreshRequest(), RequestOptions.DEFAULT);
-      System.out.println("Starting............");
+      System.out.println("Library is opening for the day............");
       System.out.println(dateToday.toString());
 
       Date dateTomorrow =
@@ -413,7 +413,7 @@ public class StartUpService {
                       bookRecord.getBookId(),
                       Date.from(
                           localDate
-                              .plusDays(11)
+                              .plusDays(5)
                               .atStartOfDay()
                               .atZone(ZoneId.systemDefault())
                               .toInstant()),
@@ -425,7 +425,7 @@ public class StartUpService {
                       bookRecord.getBookId(),
                       Date.from(
                               localDate
-                                  .plusDays(11)
+                                  .plusDays(5)
                                   .atStartOfDay()
                                   .atZone(ZoneId.systemDefault())
                                   .toInstant())
@@ -482,7 +482,7 @@ public class StartUpService {
                         searchHits.get(0).getId(),
                         Date.from(
                                 localDate
-                                    .plusDays(11)
+                                    .plusDays(5)
                                     .atStartOfDay()
                                     .atZone(ZoneId.systemDefault())
                                     .toInstant())
@@ -499,7 +499,7 @@ public class StartUpService {
                         bookRecord.getBookId(),
                         Date.from(
                             localDate
-                                .plusDays(11)
+                                .plusDays(5)
                                 .atStartOfDay()
                                 .atZone(ZoneId.systemDefault())
                                 .toInstant()),
@@ -579,7 +579,7 @@ public class StartUpService {
       localDate = localDate.plusDays(1);
       dateToday = dateTomorrow;
 
-      System.out.println("Ending............\n");
+      System.out.println("Library is closed for the day!............\n");
     }
 
     System.out.println("Data Creation Complete!");
@@ -623,7 +623,6 @@ public class StartUpService {
 
   private IndexRequest createActivityRequest(
       String activityType, Date activityDate, String userId, String bookId, String libraryId) {
-
     return new IndexRequest("activity")
         .source(
             XContentType.JSON,
@@ -660,6 +659,7 @@ public class StartUpService {
         bookRecords.add(bookRecord);
       }
     }
+
     return bookRecords;
   }
 }
