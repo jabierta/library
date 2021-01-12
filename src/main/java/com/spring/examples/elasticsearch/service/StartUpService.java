@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 public class StartUpService {
   private final ResourceLoader resourceLoader;
   private final RestHighLevelClient elasticsearchClient;
+  private final UserService userService;
 
   @PostConstruct
   /*This method is not optimised and Big O notation is O(n^c)*/
@@ -327,11 +328,11 @@ public class StartUpService {
         user.setFirstName((String) userHitSourceAsMap.get("firstName"));
         user.setLastName((String) userHitSourceAsMap.get("lastName"));
         List<BookRecord> currentlyBorrowedBooks =
-            this.toBookRecord(
+            userService.toBookRecord(
                 (List<HashMap<String, Object>>) userHitSourceAsMap.get("currentlyBorrowedBooks"));
         user.setCurrentlyBorrowedBooks(currentlyBorrowedBooks);
         List<BookRecord> currentlyReservedBooks =
-            this.toBookRecord(
+            userService.toBookRecord(
                 (List<HashMap<String, Object>>) userHitSourceAsMap.get("currentlyReservedBooks"));
         user.setCurrentlyReservedBooks(currentlyReservedBooks);
         userList.add(user);
@@ -648,19 +649,5 @@ public class StartUpService {
     jsonMap.put("isAvailableToBorrow", isAvailableToBorrow);
 
     return request.doc(jsonMap);
-  }
-
-  private List<BookRecord> toBookRecord(List<HashMap<String, Object>> hashMapList) {
-    List<BookRecord> bookRecords = new ArrayList<BookRecord>();
-    if (hashMapList != null && !hashMapList.isEmpty()) {
-      for (HashMap<String, Object> hashMap : hashMapList) {
-        BookRecord bookRecord = new BookRecord();
-        bookRecord.setBookId((String) hashMap.get("bookId"));
-        bookRecord.setReturnDate((Long) hashMap.get("returnDate"));
-        bookRecords.add(bookRecord);
-      }
-    }
-
-    return bookRecords;
   }
 }

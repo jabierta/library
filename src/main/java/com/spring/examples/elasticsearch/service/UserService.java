@@ -83,8 +83,12 @@ public class UserService {
                             hit.getId(),
                             (String) hit.getSourceAsMap().get("firstName"),
                             (String) hit.getSourceAsMap().get("lastName"),
-                            (List<BookRecord>) hit.getSourceAsMap().get("currentlyBorrowedBooks"),
-                            (List<BookRecord>) hit.getSourceAsMap().get("currentlyReservedBooks")))
+                            this.toBookRecord(
+                                (List<HashMap<String, Object>>)
+                                    hit.getSourceAsMap().get("currentlyBorrowedBooks")),
+                            this.toBookRecord(
+                                (List<HashMap<String, Object>>)
+                                    hit.getSourceAsMap().get("currentlyReservedBooks"))))
                 .collect(Collectors.toList()));
 
         scrollId = searchResponse.getScrollId();
@@ -127,8 +131,12 @@ public class UserService {
                       hit.getId(),
                       (String) hit.getSourceAsMap().get("firstName"),
                       (String) hit.getSourceAsMap().get("lastName"),
-                      (List<BookRecord>) hit.getSourceAsMap().get("currentlyBorrowedBooks"),
-                      (List<BookRecord>) hit.getSourceAsMap().get("currentlyReservedBooks")))
+                      this.toBookRecord(
+                          (List<HashMap<String, Object>>)
+                              hit.getSourceAsMap().get("currentlyBorrowedBooks")),
+                      this.toBookRecord(
+                          (List<HashMap<String, Object>>)
+                              hit.getSourceAsMap().get("currentlyReservedBooks"))))
           .collect(Collectors.toList());
 
     } catch (IOException e) {
@@ -152,8 +160,10 @@ public class UserService {
           result.getId(),
           (String) sourceAsMap.get("firstName"),
           (String) sourceAsMap.get("lastName"),
-          (List<BookRecord>) sourceAsMap.get("currentlyBorrowedBooks"),
-          (List<BookRecord>) sourceAsMap.get("currentlyReservedBooks"));
+          this.toBookRecord(
+              (List<HashMap<String, Object>>) sourceAsMap.get("currentlyBorrowedBooks")),
+          this.toBookRecord(
+              (List<HashMap<String, Object>>) sourceAsMap.get("currentlyReservedBooks")));
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -168,5 +178,19 @@ public class UserService {
       e.printStackTrace();
       throw new ServerErrorException("Server encountered an error deleting user.", e);
     }
+  }
+
+  public List<BookRecord> toBookRecord(List<HashMap<String, Object>> hashMapList) {
+    List<BookRecord> bookRecords = new ArrayList<BookRecord>();
+    if (hashMapList != null && !hashMapList.isEmpty()) {
+      for (HashMap<String, Object> hashMap : hashMapList) {
+        BookRecord bookRecord = new BookRecord();
+        bookRecord.setBookId((String) hashMap.get("bookId"));
+        bookRecord.setReturnDate((Long) hashMap.get("returnDate"));
+        bookRecords.add(bookRecord);
+      }
+    }
+
+    return bookRecords;
   }
 }
