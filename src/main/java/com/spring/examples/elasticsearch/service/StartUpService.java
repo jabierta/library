@@ -40,6 +40,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.util.Pair;
@@ -54,9 +55,16 @@ public class StartUpService {
   private final RestHighLevelClient elasticsearchClient;
   private final UserService userService;
 
+  @Value("${startupservice.enable}")
+  private boolean runInitializeData;
+
   @PostConstruct
   /*This method is not optimised and Big O notation is O(n^c)*/
   public void initializeData() throws IOException, ParseException {
+    if (!runInitializeData) {
+      return;
+    }
+
     BulkRequest createUserBulkRequest = new BulkRequest();
 
     // Delete data in existing user index and creates an empty user index
