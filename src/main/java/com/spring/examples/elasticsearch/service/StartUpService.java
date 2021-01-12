@@ -47,7 +47,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-// Create conditional property to run or not
 // This is a Frankenstein
 // TODO: Update and create a better approach
 public class StartUpService {

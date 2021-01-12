@@ -23,7 +23,7 @@ public class UserController {
 
   @GetMapping("/user")
   private List<User> list() {
-   return null;
+   return userService.list();
   }
 
   @GetMapping("/getFavouriteBook")
