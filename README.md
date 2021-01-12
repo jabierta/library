@@ -23,6 +23,10 @@ An action done by a user on a book
    
     `POST /createUser requestBody: CreateUserRequest.java`
 
+- Get the list of users
+
+  `GET /user`
+
 - Get the favourite book of user for a specific month of a year or just year
 
   `GET /getFavouriteBook requestParameters: [userId, month, year]`
@@ -30,6 +34,10 @@ An action done by a user on a book
 - On average how long does a user keep a book
   
   `GET /averageHoldOnBook requestPrameters: [userId]`
+
+- Get top 10 most active users
+  
+  `GET /top10Users`
 
 ### BookController
 
