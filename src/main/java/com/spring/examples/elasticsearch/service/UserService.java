@@ -73,8 +73,6 @@ public class UserService {
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(TimeValue.timeValueMinutes(1L));
 
-        searchResponse = elasticsearchClient.scroll(scrollRequest, RequestOptions.DEFAULT);
-
         users.addAll(
             Arrays.stream(searchResponse.getHits().getHits())
                 .map(
@@ -91,8 +89,10 @@ public class UserService {
                                     hit.getSourceAsMap().get("currentlyReservedBooks"))))
                 .collect(Collectors.toList()));
 
+        searchResponse = elasticsearchClient.scroll(scrollRequest, RequestOptions.DEFAULT);
         scrollId = searchResponse.getScrollId();
       }
+
       ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
       clearScrollRequest.addScrollId(scrollId);
       ClearScrollResponse clearScrollResponse =
