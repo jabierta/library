@@ -15,6 +15,8 @@ A location where books are stored
 ### Activity
 An action done by a user on a book
 
+// TODO
+# (Add here how to start/run project) and how StartUpService.java works
 
 
 ##  Endpoints
