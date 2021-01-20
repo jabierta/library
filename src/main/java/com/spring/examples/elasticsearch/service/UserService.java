@@ -199,7 +199,7 @@ public class UserService {
    * "size": 1000 }, "aggs": { "books": { "terms": { "field": "bookId.keyword", "size": 10 } } } } }
    * }
    *
-   * GET activity/_search { "query": { "bool": { "must": [ { "match": { "userId.keyword":
+   * <p>GET activity/_search { "query": { "bool": { "must": [ { "match": { "userId.keyword":
    * "Aunw7nYBNjuDNBQni3sF" } }, { "match": { "bookId.keyword": "4enw7nYBNjuDNBQnjXy6" } } ] } },
    * "aggs": { "users": { "terms": { "field": "userId.keyword", "size": 1000 }, "aggs": { "books": {
    * "terms": { "field": "bookId.keyword", "size": 10 } } } } } }
