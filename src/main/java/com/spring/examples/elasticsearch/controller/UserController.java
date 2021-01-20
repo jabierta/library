@@ -1,7 +1,9 @@
 package com.spring.examples.elasticsearch.controller;
 
 import com.spring.examples.elasticsearch.controller.request.CreateUserRequest;
+import com.spring.examples.elasticsearch.domain.Book;
 import com.spring.examples.elasticsearch.domain.User;
+import com.spring.examples.elasticsearch.service.BookService;
 import com.spring.examples.elasticsearch.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
   private final UserService userService;
+  private final BookService bookService;
 
   @PostMapping("/user")
   private User test(@RequestBody CreateUserRequest createUserRequest) {
@@ -23,14 +26,16 @@ public class UserController {
 
   @GetMapping("/user")
   private List<User> list() {
-   return userService.list();
+    return userService.list();
   }
 
   @GetMapping("/getFavouriteBook")
-  private User test(
+  private Book test(
       @RequestParam(name = "userId", required = true) String userId,
       @RequestParam(name = "month", required = false) Integer month,
       @RequestParam(name = "year", required = true) Integer year) {
-    return null;
+    String bookId = userService.getFavouriteBook(userId, month, year);
+
+    return bookService.find(bookId);
   }
 }
