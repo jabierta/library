@@ -48,7 +48,7 @@ An action done by a user on a book
 
   Activity An activity done by a user action enum - CheckedIn - CheckedOut - Reserved - Date - Top
   Active User(s)
-  - Least Active User(s)
+  - Least// Active User(s)
 
 ## Elasticsearch and Kibana Docs
 ### Elasticsearch
