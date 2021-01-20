@@ -42,6 +42,13 @@ An action done by a user on a book
   `GET /top10Users`
 
 ### BookController
+  - Get most borrowed book in a ibrary in a given month of a year, list limits the amount returned
+    
+    `GET /mostBorrowedBook requestParameters: [ibraryId, month, year, list]`
+  
+  - Get most reserved book in a ibrary in a given month of a year, list limits the amount returned
+    
+    `GET /mostBorrowedBook requestParameters: [ibraryId, month, year, list]`
 
 #### ActivityController
 
