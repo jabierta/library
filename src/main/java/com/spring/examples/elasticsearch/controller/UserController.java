@@ -3,6 +3,7 @@ package com.spring.examples.elasticsearch.controller;
 import com.spring.examples.elasticsearch.controller.request.CreateUserRequest;
 import com.spring.examples.elasticsearch.domain.Book;
 import com.spring.examples.elasticsearch.domain.User;
+import com.spring.examples.elasticsearch.service.ActivityService;
 import com.spring.examples.elasticsearch.service.BookService;
 import com.spring.examples.elasticsearch.service.UserService;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
   private final UserService userService;
   private final BookService bookService;
+  private final ActivityService activityService;
 
   @PostMapping("/user")
   private User test(@RequestBody CreateUserRequest createUserRequest) {
@@ -34,6 +36,6 @@ public class UserController {
       @RequestParam(name = "userId", required = true) String userId,
       @RequestParam(name = "month", required = false) Integer month,
       @RequestParam(name = "year", required = true) Integer year) {
-    return bookService.find(userService.getFavouriteBook(userId, month, year));
+    return bookService.find(activityService.getFavouriteBook(userId, month, year));
   }
 }
