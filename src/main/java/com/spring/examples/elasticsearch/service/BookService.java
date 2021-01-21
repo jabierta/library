@@ -22,7 +22,6 @@ public class BookService {
           elasticSearchClient.get(new GetRequest("book", bookId), RequestOptions.DEFAULT);
       return sourceAsMapToBook(bookId, getResponse.getSourceAsMap());
     } catch (IOException e) {
-      // Maybe we should throw a CannotFindException
       return null;
     }
   }

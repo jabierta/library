@@ -34,8 +34,6 @@ public class UserController {
       @RequestParam(name = "userId", required = true) String userId,
       @RequestParam(name = "month", required = false) Integer month,
       @RequestParam(name = "year", required = true) Integer year) {
-    String bookId = userService.getFavouriteBook(userId, month, year);
-
-    return bookService.find(bookId);
+    return bookService.find(userService.getFavouriteBook(userId, month, year));
   }
 }
