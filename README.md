@@ -1,12 +1,14 @@
-# Spring Data Elasticsearch
+# Library
 
-## Project Definition and Goal
+## Project Definition 
 
 ### Definition
+ What this software that uses 
 
-### Goals:
 
-1. Show advance aggregates and queries
+// TODO (Add here how to start/run project) and how StartUpService.java works
+/ TODO add running guide -> download and unpack, then run gradlew build ensure that startupservice is enabled in applicaiton.properties
+## Running the application
 
 ## Entities
 
@@ -26,9 +28,7 @@ A location where books are stored
 
 An action done by a user on a book
 
-// TODO
-
-# (Add here how to start/run project) and how StartUpService.java works
+Activity An activity done by a user action enum - CheckedIn - CheckedOut - Reserved - Date
 
 ## Endpoints
 
@@ -42,8 +42,10 @@ An action done by a user on a book
 
   `GET /user`
 
-- Get the favourite book of user for a specific month of a year or just year favourite means a book
-  they "interacted" the most, in our system this would be the calculated as the sum of activities
+- Get the favourite book of user for a specific month of a year or just year
+  - Note: Favourite means a
+  book they "interacted" the most, in our system this would be the calculated as the sum of
+  activities
 
   `GET /getFavouriteBook requestParameters: [userId, month, year]`
 
@@ -67,19 +69,16 @@ An action done by a user on a book
 
 #### ActivityController
 
-Activity An activity done by a user action enum - CheckedIn - CheckedOut - Reserved - Date - Top
-Active User(s)
-
-- Least// Active User(s)
+-GET  Least/Most Active User(s)
 
 ## Elasticsearch and Kibana Docs
 
 ### Elasticsearch
 
 - Version in project: _7.10_
-- [Installation](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html)
-- [Java Rest Client](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html)
-- Default Elasticsearch PORT: **9200**
+- [Installation Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html)
+- [Java Rest Client Docs](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html)
+- Default Elasticsearch Port: **9200**
 - Starting Elasticsearch in a Windows machine installed in Program
   Files: `.\'Program Files'\elasticsearch-7.10.1\bin\elasticsearch.bat`
 - Adding new instance: `.\elasticsearch.bat -E path.data=[path.data] -E path.logs=[path.log]`
@@ -90,4 +89,4 @@ Active User(s)
 - [Installation](https://www.elastic.co/guide/en/kibana/current/install.html)
 - Starting Elasticsearch in a Windows machine installed in Program
   Files: `.\'Program Files'\kibana-7.10.1-windows-x86_64\bin\kibana.bat`
-- Default Kibana PORT: **5601**
+- Default Kibana Port: **5601**
