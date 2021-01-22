@@ -22,7 +22,7 @@ public class UserController {
   private final ActivityService activityService;
 
   @PostMapping("/user")
-  private User test(@RequestBody CreateUserRequest createUserRequest) {
+  private User create(@RequestBody CreateUserRequest createUserRequest) {
     return userService.create(createUserRequest.getFirstName(), createUserRequest.getLastName());
   }
 
@@ -32,10 +32,16 @@ public class UserController {
   }
 
   @GetMapping("/getFavouriteBook")
-  private Book test(
+  private Book getFavouriteBook(
       @RequestParam(name = "userId", required = true) String userId,
       @RequestParam(name = "month", required = false) Integer month,
       @RequestParam(name = "year", required = true) Integer year) {
     return bookService.find(activityService.getFavouriteBook(userId, month, year));
+  }
+
+  @GetMapping("/averageHoldOnBook")
+  private Integer averageHoldOnBook(
+      @RequestParam(name = "userId", required = true) String userId) {
+    return (int) activityService.getAverageHoldOnBooksByUserId(userId);
   }
 }

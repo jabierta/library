@@ -1,7 +1,14 @@
 package com.spring.examples.elasticsearch.service;
 
+import com.spring.examples.elasticsearch.domain.Action;
+import com.spring.examples.elasticsearch.domain.Activity;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -59,7 +66,60 @@ public class ActivityService {
 
       return topBookAgg.getBuckets().get(0).getKeyAsString();
     } catch (IOException e) {
+      e.printStackTrace();
       return null;
+    }
+  }
+
+  public double getAverageHoldOnBooksByUserId(String userId) {
+    try {
+      List<Integer> averageDurationForBooks = new ArrayList<>();
+      // Query -> bool{must[{match:"userId"},{terms: activityDate:["CHCECKEDIN","CHECKEDOUT"]}]}
+      SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+      searchSourceBuilder
+          .query(
+              QueryBuilders.boolQuery()
+                  .must(QueryBuilders.matchQuery("userId.keyword", userId))
+                  .must(
+                      QueryBuilders.termsQuery(
+                          "activityType.keyword",
+                          Arrays.asList(Action.CHECKEDIN.name(), Action.CHECKEDOUT.name()))))
+          .size(10000);
+
+      searchSourceBuilder.aggregation(
+          AggregationBuilders.terms("by_books")
+              .field("bookId.keyword")
+              .subAggregation(
+                  AggregationBuilders.terms("by_activityType")
+                      .field("activityType.keyword")
+                      .subAggregation(
+                          AggregationBuilders.terms("by_activityDate").field("activityDate"))));
+
+      SearchRequest searchRequest = new SearchRequest();
+      searchRequest.source(searchSourceBuilder);
+
+      SearchResponse searchResponse =
+          elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
+
+      Terms topBookAgg = searchResponse.getAggregations().get("by_books");
+
+      Terms byBooks = searchResponse.getAggregations().get("by_books");
+
+      byBooks.getBuckets().get(0).getAggregations()
+
+      Map<String, List<Activity>> bookActivity = new HashMap<>();
+
+      // for each element sort the activity date, this must be odd otherwise remove the last
+      // element.
+      // after get the duration between CHECKEDIN, CHECKEDOUT by grabbing two elements at a time
+      // then find average of durations then insert to averageDurationForBooks;
+
+      return averageDurationForBooks.stream().mapToDouble(element -> element).average().orElse(0);
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      return 0;
     }
   }
 }

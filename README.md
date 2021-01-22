@@ -51,7 +51,7 @@ Activity An activity done by a user action enum - CheckedIn - CheckedOut - Reser
 
   `GET /getFavouriteBook requestParameters: [userId, month, year]`
 
-- On average how long does a user keep a book
+- On average how long does a user keep a book returned in days
 
   `GET /averageHoldOnBook requestPrameters: [userId]`
 
