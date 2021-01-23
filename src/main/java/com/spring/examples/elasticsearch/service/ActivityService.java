@@ -1,14 +1,15 @@
 package com.spring.examples.elasticsearch.service;
 
 import com.spring.examples.elasticsearch.domain.Action;
-import com.spring.examples.elasticsearch.domain.Activity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jdk.internal.net.http.common.Pair;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -18,6 +19,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Service;
 
@@ -106,9 +108,31 @@ public class ActivityService {
 
       Terms byBooks = searchResponse.getAggregations().get("by_books");
 
-      byBooks.getBuckets().get(0).getAggregations()
+      Map<String, Double> books = new HashMap<>();
+book1
+    [{checkedIn, date1}, {checkedIn, date2}]
+    [{checkedOut, date3},{checkoutOut, date 4}]
 
-      Map<String, List<Activity>> bookActivity = new HashMap<>();
+book1
+    [{checkedIn, date1}, {checkedOut, date3}, {checkedIn, date2}, {checkedOut, date4}]
+
+book1
+    [{date3-date1}, {date4-date2}]
+
+book1
+    [avg]
+
+      for (Bucket byBooksBucket : byBooks.getBuckets()) {
+        String bookId = byBooksBucket.getKeyAsString();
+        Terms byActivityTypes = byBooksBucket.getAggregations().get("by_activityType");
+        for (Bucket byActivityTypeBucket : byActivityTypes.getBuckets()){
+          for () {
+
+          }
+        }
+          books.put(byBooksBucket.getKeyAsString(), null);
+      }
+      byBooks.getBuckets().get(0).getAggregations();
 
       // for each element sort the activity date, this must be odd otherwise remove the last
       // element.
