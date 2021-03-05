@@ -92,3 +92,11 @@ Activity An activity done by a user action enum - CheckedIn - CheckedOut - Reser
 - Starting Elasticsearch in a Windows machine installed in Program
   Files: `.\'Program Files'\kibana-7.10.1-windows-x86_64\bin\kibana.bat`
 - Default Kibana Port: **5601**
+
+
+### TODO
+  - Add scripts in resource folder or another appropriate location
+  - Create endpoints from ReadMe
+  - Update ReadMe
+  -  CurrentPage: https://docs.spring.io/spring-data/elasticsearch/docs/4.1.2/reference/html/#elasticsearch.clients
+  -  https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-overview.html
